@@ -55,6 +55,21 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Verify Secrets
+        env:
+          MONGO_DB_URL: ${{ secrets.MONGO_DB_URL }}
+          MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+        run: |
+          if [ -z "$MONGO_DB_URL" ]; then
+            echo "❌ Error: MONGO_DB_URL secret is missing or empty!"
+            exit 1
+          fi
+          if [ -z "$MONGO_DB_NAME" ]; then
+            echo "❌ Error: MONGO_DB_NAME secret is missing or empty!"
+            exit 1
+          fi
+          echo "✅ Database secrets are present."
+
       - name: Deploy Infrastructure (CDK)
         working-directory: ./infra
         env:
@@ -86,6 +101,9 @@ jobs:
           TABLE_TRIPS: ${{ secrets.TABLE_TRIPS }}
           TABLE_GPS_POSITIONS: ${{ secrets.TABLE_GPS_POSITIONS }}
           TABLE_CONNECTIONS: ${{ secrets.TABLE_CONNECTIONS }}
+          # Database Configuration
+          MONGO_DB_URL: ${{ secrets.MONGO_DB_URL }}
+          MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
           # CDK Configuration
           BACKEND_CODE_PATH: ../dist_backend
         run: |

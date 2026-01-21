@@ -166,7 +166,10 @@ export class LimajsMotorsStack extends cdk.Stack {
                     WEBSOCKET_API_ID: websocketApiId,
                     // AWS Location
                     AWS_LOCATION_TRACKER_NAME: locationTrackerName,
+                    AWS_LOCATION_TRACKER_NAME: locationTrackerName,
                     AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+                    MONGO_DB_URL: process.env.MONGO_DB_URL || '',
+                    MONGO_DB_NAME: process.env.MONGO_DB_NAME || 'limajs',
                     ...env
                 },
                 memorySize: 256
