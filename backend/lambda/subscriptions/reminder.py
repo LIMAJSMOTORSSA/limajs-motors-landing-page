@@ -8,62 +8,50 @@ import json
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-import boto3
+# import boto3
 
 # Imports locaux
 import sys
 sys.path.insert(0, '/var/task')
-from shared.db import get_table
+from shared.db import get_item, put_item, update_item, query_items
 from shared.resend_client import send_email
 from invoices.generate import generate_and_upload_invoice
 
-# Configuration
-REGION = 'us-east-1'
-dynamodb = boto3.resource('dynamodb', region_name=REGION)
+# Subscription Types (Hardcoded/Shared)
+SUBSCRIPTION_TYPES = {
+    'DAILY': {'name': 'Pass Journalier', 'price': 100, 'currency': 'HTG', 'duration': 1},
+    'WEEKLY': {'name': 'Pass Hebdomadaire', 'price': 600, 'currency': 'HTG', 'duration': 7},
+    'MONTHLY': {'name': 'Pass Mensuel', 'price': 2000, 'currency': 'HTG', 'duration': 30}
+}
 
 
 def get_expiring_subscriptions(days_until_expiry: int) -> list:
     """
     Récupère les abonnements qui expirent dans X jours
     """
-    table = get_table('limajs-subscriptions')
-    
     target_date = (datetime.now() + timedelta(days=days_until_expiry)).strftime('%Y-%m-%d')
     
     # Query by status and endDate
-    response = table.query(
-        IndexName='status-enddate',
-        KeyConditionExpression='#status = :status AND #endDate = :date',
-        ExpressionAttributeNames={
-            '#status': 'status',
-            '#endDate': 'endDate'
-        },
-        ExpressionAttributeValues={
-            ':status': 'active',
-            ':date': target_date
-        }
+    # Note: Status logic updated to uppercase 'ACTIVE' to match crud.py
+    return query_items(
+        'limajs-subscriptions',
+        {'status': 'ACTIVE', 'endDate': target_date}
     )
-    
-    return response.get('Items', [])
 
 
 def get_user(user_id: str) -> dict:
     """Récupère les infos utilisateur"""
-    table = get_table('limajs-users')
-    response = table.get_item(Key={'userId': user_id, 'type': 'PROFILE'})
-    return response.get('Item', {})
+    return get_item('limajs-users', {'userId': user_id, 'type': 'PROFILE'}) or {}
 
 
 def get_subscription_type(type_id: str) -> dict:
     """Récupère les infos du type d'abonnement"""
-    table = get_table('limajs-subscriptions')
-    response = table.get_item(Key={'pk': 'TYPE', 'sk': type_id})
-    return response.get('Item', {})
+    return SUBSCRIPTION_TYPES.get(type_id, {})
 
 
 def create_invoice_record(user: dict, subscription: dict, sub_type: dict) -> dict:
     """Crée un enregistrement de facture dans DynamoDB"""
-    table = get_table('limajs-invoices')
+    # table = get_table('limajs-invoices')
     
     invoice_id = f"inv-{datetime.now().strftime('%Y%m%d%H%M%S')}-{user['userId'][-6:]}"
     
@@ -78,7 +66,7 @@ def create_invoice_record(user: dict, subscription: dict, sub_type: dict) -> dic
         'createdAt': datetime.now().isoformat()
     }
     
-    table.put_item(Item=item)
+    put_item('limajs-invoices', item)
     return item
 
 
@@ -203,11 +191,10 @@ def process_reminders(days: int):
             result = generate_and_upload_invoice(invoice_data)
             
             # Update invoice record with PDF URL
-            table = get_table('limajs-invoices')
-            table.update_item(
-                Key={'invoiceId': invoice_record['invoiceId'], 'userId': user['userId']},
-                UpdateExpression='SET pdfUrl = :url',
-                ExpressionAttributeValues={':url': result['pdfUrl']}
+            update_item(
+                'limajs-invoices',
+                {'invoiceId': invoice_record['invoiceId'], 'userId': user['userId']},
+                {'pdfUrl': result['pdfUrl']}
             )
             
             # Send reminder email

@@ -7,8 +7,9 @@ from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.response import success, error
-from shared.db import put_item, get_item, query_items, scan_items, update_item, convert_floats
-from boto3.dynamodb.conditions import Key, Attr
+
+# Removing boto3 condition imports
+# from boto3.dynamodb.conditions import Key, Attr
 
 TABLE_PAYMENTS = os.environ.get('TABLE_PAYMENTS', 'limajs-payments')
 S3_BUCKET = os.environ.get('AWS_S3_BUCKET_NAME')
@@ -106,7 +107,7 @@ def create_payment(event):
     
     payment_id = f"PAYMENT#{str(uuid.uuid4())}"
     
-    payment_item = convert_floats({
+    payment_item = {
         'paymentId': payment_id,
         'timestamp': datetime.utcnow().isoformat(),
         'userId': user_id,
@@ -118,7 +119,7 @@ def create_payment(event):
         'proofS3Key': body['proofS3Key'],
         'notes': body.get('notes', ''),
         'createdAt': datetime.utcnow().isoformat()
-    })
+    }
     
     put_item(TABLE_PAYMENTS, payment_item)
     
@@ -128,53 +129,62 @@ def create_payment(event):
 
 def list_pending_payments():
     """Lister tous les paiements en attente (Admin)."""
+    # Key('status').eq('PENDING') -> {'status': 'PENDING'}
     payments = query_items(
         TABLE_PAYMENTS,
-        Key('status').eq('PENDING'),
-        index_name='status-timestamp-index'
+        {'status': 'PENDING'}
     )
     
     return success({'payments': payments, 'count': len(payments)})
 
 def approve_payment(payment_id, event):
     """Approuver un paiement (Admin)."""
-    payment = get_item(TABLE_PAYMENTS, {
-        'paymentId': payment_id,
-        'timestamp': event.get('body') and json.loads(event['body']).get('timestamp')
-    })
+    # DynamoDB expects Key={'paymentId': ...} if it's primary key
+    # In legacy code: get_item(..., {'paymentId': ..., 'timestamp': ...}) 
+    # This implies composite key. BUT we don't know timestamp here unless transmitted? 
+    # Legacy code tried to get timestamp from body.
+    # We can just query by paymentId if we assume uniqueness or use scan/find fallback.
+    # Mongo find_one by paymentId is simple.
     
+    # We try get_item first with paymentId (if we treat it as simple query). 
+    # get_item in db.py findsOne using the dict as filter. So {'paymentId': pid} is enough if unique.
+    
+    payment = get_item(TABLE_PAYMENTS, {'paymentId': payment_id})
+        
     if not payment:
-        # Fallback: scan pour trouver le payment
-        all_payments = scan_items(TABLE_PAYMENTS, Attr('paymentId').eq(payment_id))
-        if not all_payments:
-            return error(404, "Payment not found")
-        payment = all_payments[0]
+        return error(404, "Payment not found")
     
     # Mettre à jour le statut
     updated = update_item(
         TABLE_PAYMENTS,
-        {'paymentId': payment_id, 'timestamp': payment['timestamp']},
-        "SET #status = :status, approvedAt = :approved",
-        {':status': 'APPROVED', ':approved': datetime.utcnow().isoformat()},
-        {'#status': 'status'}
+        {'paymentId': payment_id}, # using simple filter
+        {'status': 'APPROVED', 'approvedAt': datetime.utcnow().isoformat()}
     )
     
     # Activer l'abonnement correspondant
     TABLE_SUBSCRIPTIONS = os.environ.get('TABLE_SUBSCRIPTIONS', 'limajs-subscriptions')
     
     # Trouver l'abonnement PENDING lié à ce paiement
-    subs = scan_items(TABLE_SUBSCRIPTIONS, Attr('paymentId').eq(payment_id))
+    # scan_items(..., Attr('paymentId').eq(payment_id))
+    subs = scan_items(TABLE_SUBSCRIPTIONS, {'paymentId': payment_id})
     
     if subs:
         sub = subs[0]
+        # In current DynamoDB table, subscription Key is implicit/complex?
+        # In migration we copied it. We need to identify it.
+        # Assuming we can update by internal _id or some unique field.
+        # But db.py update_item expects a filter.
+        # We can use {'paymentId': payment_id} again if 1:1, or use sub's fields.
+        # Let's use whatever we have to uniquely identify.
+        # Legacy code used: {'userId': sub['userId'], 'subscriptionId': sub['subscriptionId']}
+        # So we use that filter.
+        
         update_item(
             TABLE_SUBSCRIPTIONS,
             {'userId': sub['userId'], 'subscriptionId': sub['subscriptionId']},
-            "SET #status = :status, activatedAt = :activated",
-            {':status': 'ACTIVE', ':activated': datetime.utcnow().isoformat()},
-            {'#status': 'status'}
+            {'status': 'ACTIVE', 'activatedAt': datetime.utcnow().isoformat()}
         )
-        print(f"✅ Abonnement {sub['subscriptionId']} activé")
+        print(f"✅ Abonnement {sub.get('subscriptionId')} activé")
     
     return success({'payment': updated}, "Payment approved and subscription activated")
 
@@ -182,7 +192,8 @@ def reject_payment(payment_id, event):
     """Rejeter un paiement (Admin)."""
     body = json.loads(event.get('body', '{}'))
     
-    all_payments = scan_items(TABLE_PAYMENTS, Attr('paymentId').eq(payment_id))
+    # scan/find payment
+    all_payments = scan_items(TABLE_PAYMENTS, {'paymentId': payment_id})
     if not all_payments:
         return error(404, "Payment not found")
     
@@ -190,14 +201,12 @@ def reject_payment(payment_id, event):
     
     updated = update_item(
         TABLE_PAYMENTS,
-        {'paymentId': payment_id, 'timestamp': payment['timestamp']},
-        "SET #status = :status, rejectedAt = :rejected, rejectionReason = :reason",
+        {'paymentId': payment_id},
         {
-            ':status': 'REJECTED',
-            ':rejected': datetime.utcnow().isoformat(),
-            ':reason': body.get('reason', 'No reason provided')
-        },
-        {'#status': 'status'}
+            'status': 'REJECTED',
+            'rejectedAt': datetime.utcnow().isoformat(),
+            'rejectionReason': body.get('reason', 'No reason provided')
+        }
     )
     
     return success({'payment': updated}, "Payment rejected")

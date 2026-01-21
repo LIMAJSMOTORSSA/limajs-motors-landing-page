@@ -4,3 +4,5 @@ aws-lambda-powertools>=2.30.0
 qrcode>=7.4.2
 Pillow>=10.0.0
 reportlab>=4.0.0
+pymongo>=4.0.0
+python-dotenv>=1.0.0

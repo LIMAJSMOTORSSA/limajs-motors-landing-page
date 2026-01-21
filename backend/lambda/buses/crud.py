@@ -7,7 +7,9 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.response import success, error, get_http_method, get_path_parameters
 from shared.db import put_item, get_item, scan_items, delete_item, update_item, convert_floats
-from boto3.dynamodb.conditions import Key, Attr
+
+# Removing boto3 Key/Attr imports as they are no longer used for DB queries
+# from boto3.dynamodb.conditions import Key, Attr
 
 TABLE_BUSES = os.environ.get('TABLE_BUSES', 'limajs-buses')
 
@@ -54,7 +56,7 @@ def create_bus(event):
     
     bus_id = f"BUS#{str(uuid.uuid4())}"
     
-    bus_item = convert_floats({
+    bus_item = {
         'busId': bus_id,
         'type': 'INFO',
         'plateNumber': body['plateNumber'],
@@ -67,7 +69,7 @@ def create_bus(event):
         'currentMileage': body.get('currentMileage', 0),
         'createdAt': datetime.utcnow().isoformat(),
         'updatedAt': datetime.utcnow().isoformat()
-    })
+    }
     
     put_item(TABLE_BUSES, bus_item)
     
@@ -90,11 +92,12 @@ def list_buses(event):
     query_params = event.get('queryStringParameters') or {}
     status_filter = query_params.get('status')
     
-    # Scan (à optimiser avec GSI si nécessaire)
+    # Mongo Filter
+    db_filter = {'type': 'INFO'}
     if status_filter:
-        buses = scan_items(TABLE_BUSES, Attr('status').eq(status_filter) & Attr('type').eq('INFO'))
-    else:
-        buses = scan_items(TABLE_BUSES, Attr('type').eq('INFO'))
+        db_filter['status'] = status_filter
+    
+    buses = scan_items(TABLE_BUSES, db_filter)
     
     return success({'buses': buses, 'count': len(buses)})
 
@@ -107,22 +110,18 @@ def update_bus(bus_id, event):
     if not existing:
         return error(404, "Bus not found")
     
-    # Construire l'expression de mise à jour
-    update_expr = "SET updatedAt = :updated"
-    expr_values = {':updated': datetime.utcnow().isoformat()}
+    update_data = { 'updatedAt': datetime.utcnow().isoformat() }
     
     allowed_updates = ['model', 'manufacturer', 'year', 'capacity', 'status', 'fuelType', 'currentMileage']
     
     for field in allowed_updates:
         if field in body:
-            update_expr += f", {field} = :{field}"
-            expr_values[f":{field}"] = body[field]
+            update_data[field] = body[field]
     
     updated_bus = update_item(
         TABLE_BUSES,
         {'busId': bus_id, 'type': 'INFO'},
-        update_expr,
-        convert_floats(expr_values)
+        update_data
     )
     
     return success({'bus': updated_bus}, "Bus updated successfully")
@@ -137,9 +136,7 @@ def delete_bus(bus_id):
     updated = update_item(
         TABLE_BUSES,
         {'busId': bus_id, 'type': 'INFO'},
-        "SET #status = :status, updatedAt = :updated",
-        {':status': 'RETIRED', ':updated': datetime.utcnow().isoformat()},
-        {'#status': 'status'}
+        {'status': 'RETIRED', 'updatedAt': datetime.utcnow().isoformat()}
     )
     
     return success({'bus': updated}, "Bus retired successfully")

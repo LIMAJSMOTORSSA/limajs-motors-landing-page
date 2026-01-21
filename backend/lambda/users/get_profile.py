@@ -1,12 +1,11 @@
 import json
-import boto3
 import os
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.response import success, error, get_user_claims, get_user_sub
+from shared import db
 
-dynamodb = boto3.client('dynamodb')
 TABLE_USERS = os.environ.get('TABLE_USERS', 'limajs-users')
 
 def lambda_handler(event, context):
@@ -19,25 +18,28 @@ def lambda_handler(event, context):
 
         user_id = f"USER#{user_sub}"
 
-        response = dynamodb.get_item(
-            TableName=TABLE_USERS,
-            Key={
-                'userId': {'S': user_id},
-                'type': {'S': 'PROFILE'}
-            }
+        # Use new generic get_item which expects simple dict key
+        # Note: keys for users table are implicit. Assuming 'userId' is the key we want to query by.
+        # But wait, DynamoDB table had composite key (userId, type). 
+        # In get_profile.py original code: Key={'userId': {'S': user_id}, 'type': {'S': 'PROFILE'}}
+        # So we must query by both fields in MongoDB too to find the exact document.
+        
+        item = db.get_item(
+            TABLE_USERS,
+            {'userId': user_id, 'type': 'PROFILE'}
         )
         
-        item = response.get('Item')
         if not item:
             return error(404, "Profile not found")
 
-        # Conversion DynamoDB JSON -> Python Dict simple
+        # Mongo items are already python dicts, no ['S'] needed
+        # item['userId'] might still have USER# prefix, we remove it for frontend if needed
         profile = {
-            'id': item['userId']['S'].replace('USER#', ''),
-            'email': item['email']['S'],
-            'name': item['name']['S'],
-            'role': item.get('role', {}).get('S', 'PASSENGER'),
-            'isActive': item.get('isActive', {}).get('BOOL', False)
+            'id': item['userId'].replace('USER#', ''),
+            'email': item.get('email'),
+            'name': item.get('name'),
+            'role': item.get('role', 'PASSENGER'),
+            'isActive': item.get('isActive', False)
         }
         
         return success(profile, "Profile retrieved successfully")

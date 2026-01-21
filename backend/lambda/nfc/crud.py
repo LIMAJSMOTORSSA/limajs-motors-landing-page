@@ -8,7 +8,9 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.response import success, error
 from shared.db import put_item, get_item, update_item, query_items, scan_items, convert_floats
-from boto3.dynamodb.conditions import Key, Attr
+
+# Removing boto3 Key/Attr imports
+# from boto3.dynamodb.conditions import Key, Attr
 
 TABLE_NFC = os.environ.get('TABLE_NFC', 'limajs-nfc-cards')
 
@@ -63,8 +65,7 @@ def issue_card(event):
     # Vérifier si UID existe déjà
     existing = query_items(
         TABLE_NFC,
-        Key('nfcUidHash').eq(nfc_uid_hash),
-        index_name='nfc-uid-index'
+        {'nfcUidHash': nfc_uid_hash}
     )
     
     if existing:
@@ -98,7 +99,8 @@ def activate_card(event):
         return error(400, "cardId required")
     
     # Récupérer la carte (simplifié - pas de vérification du code pour MVP)
-    cards = scan_items(TABLE_NFC, Attr('cardId').eq(card_id))
+    # scan/find by cardId
+    cards = scan_items(TABLE_NFC, {'cardId': card_id})
     
     if not cards:
         return error(404, "Card not found")
@@ -112,12 +114,10 @@ def activate_card(event):
     updated = update_item(
         TABLE_NFC,
         {'userId': card['userId'], 'cardId': card_id},
-        "SET #status = :status, activatedAt = :activated",
         {
-            ':status': 'ACTIVE',
-            ':activated': datetime.utcnow().isoformat()
-        },
-        {'#status': 'status'}
+            'status': 'ACTIVE',
+            'activatedAt': datetime.utcnow().isoformat()
+        }
     )
     
     return success({
@@ -134,7 +134,7 @@ def block_card(event):
     if not card_id:
         return error(400, "cardId required")
     
-    cards = scan_items(TABLE_NFC, Attr('cardId').eq(card_id))
+    cards = scan_items(TABLE_NFC, {'cardId': card_id})
     
     if not cards:
         return error(404, "Card not found")
@@ -144,13 +144,11 @@ def block_card(event):
     updated = update_item(
         TABLE_NFC,
         {'userId': card['userId'], 'cardId': card_id},
-        "SET #status = :status, blockedAt = :blocked, blockReason = :reason",
         {
-            ':status': 'BLOCKED',
-            ':blocked': datetime.utcnow().isoformat(),
-            ':reason': reason
-        },
-        {'#status': 'status'}
+            'status': 'BLOCKED',
+            'blockedAt': datetime.utcnow().isoformat(),
+            'blockReason': reason
+        }
     )
     
     return success({
@@ -168,11 +166,10 @@ def validate_card(event):
     
     nfc_uid_hash = hash_nfc_uid(nfc_uid)
     
-    # Query par GSI nfc-uid-index
+    # Query par GSI nfc-uid-index (Mongo find)
     cards = query_items(
         TABLE_NFC,
-        Key('nfcUidHash').eq(nfc_uid_hash),
-        index_name='nfc-uid-index'
+        {'nfcUidHash': nfc_uid_hash}
     )
     
     if not cards:
@@ -192,8 +189,7 @@ def validate_card(event):
     updated = update_item(
         TABLE_NFC,
         {'userId': card['userId'], 'cardId': card['cardId']},
-        "SET lastUsed = :now",
-        {':now': datetime.utcnow().isoformat()}
+        {'lastUsed': datetime.utcnow().isoformat()}
     )
     
     return success({
@@ -206,7 +202,7 @@ def get_user_cards(user_id):
     """Liste des cartes NFC d'un utilisateur."""
     cards = query_items(
         TABLE_NFC,
-        Key('userId').eq(f"USER#{user_id}")
+        {'userId': f"USER#{user_id}"}
     )
     
     return success({

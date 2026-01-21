@@ -2,6 +2,7 @@ import json
 import boto3
 import os
 import sys
+from datetime import datetime
 
 # Ajouter le chemin vers shared pour imports locaux (pour déploiement, shared sera packagé)
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
@@ -33,20 +34,21 @@ def lambda_handler(event, context):
         
         user_sub = response['UserSub']
         
-        # Création du profil dans DynamoDB
-        dynamodb = boto3.client('dynamodb')
+        # Création du profil dans MongoDB
+        # Note: We import db inside handler or top level. Top level is fine.
+        from shared.db import put_item
         TABLE_USERS = os.environ.get('TABLE_USERS', 'limajs-users')
         
-        dynamodb.put_item(
-            TableName=TABLE_USERS,
-            Item={
-                'userId': {'S': f"USER#{user_sub}"},
-                'type': {'S': 'PROFILE'},
-                'email': {'S': email},
-                'name': {'S': name},
-                'role': {'S': 'PASSENGER'}, # Rôle par défaut
-                'isActive': {'BOOL': True},
-                'createdAt': {'S': str(os.environ.get('AWS_LAMBDA_REQUEST_ID'))} # Timestamp idéalement
+        put_item(
+            TABLE_USERS,
+            {
+                'userId': f"USER#{user_sub}",
+                'type': 'PROFILE',
+                'email': email,
+                'name': name,
+                'role': 'PASSENGER', # Rôle par défaut
+                'isActive': True,
+                'createdAt': datetime.utcnow().isoformat() # Using datetime instead of REQUEST_ID for better data
             }
         )
         

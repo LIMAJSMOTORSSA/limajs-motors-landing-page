@@ -7,7 +7,9 @@ from datetime import datetime, timedelta
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.response import success, error, get_http_method, get_path_parameters, get_user_claims, get_user_sub
 from shared.db import put_item, get_item, query_items, scan_items, convert_floats
-from boto3.dynamodb.conditions import Key, Attr
+
+# Removing boto3 Key/Attr imports
+# from boto3.dynamodb.conditions import Key, Attr
 
 TABLE_SUBSCRIPTIONS = os.environ.get('TABLE_SUBSCRIPTIONS', 'limajs-subscriptions')
 
@@ -96,7 +98,7 @@ def create_subscription(event):
     
     subscription_id = f"SUB#{str(uuid.uuid4())}"
     
-    subscription_item = convert_floats({
+    subscription_item = {
         'userId': user_id,
         'subscriptionId': subscription_id,
         'type': sub_type,
@@ -106,7 +108,7 @@ def create_subscription(event):
         'paymentId': body['paymentId'],
         'maxRidesPerDay': None,  # Illimité
         'createdAt': start_date.isoformat()
-    })
+    }
     
     put_item(TABLE_SUBSCRIPTIONS, subscription_item)
     
@@ -123,13 +125,14 @@ def get_active_subscription(event):
     
     user_id = f"USER#{user_sub}"
     
-    # Query avec GSI user-status-index
-    # Query avec GSI user-status-index
+    # Query avec GSI user-status-index (Mongo Filter)
     subscriptions = query_items(
         TABLE_SUBSCRIPTIONS,
-        Key('userId').eq(user_id) & Key('status').eq('ACTIVE'),
-        Attr('endDate').gte(datetime.utcnow().isoformat()),
-        index_name='user-status-index'
+        {
+            'userId': user_id,
+            'status': 'ACTIVE',
+            'endDate': {'$gte': datetime.utcnow().isoformat()}
+        }
     )
     
     if not subscriptions:
@@ -144,7 +147,7 @@ def get_user_subscriptions(user_id):
     """Lister tous les abonnements d'un user (admin)."""
     subscriptions = query_items(
         TABLE_SUBSCRIPTIONS,
-        Key('userId').eq(f"USER#{user_id}")
+        {'userId': f"USER#{user_id}"}
     )
     
     return success({'subscriptions': subscriptions, 'count': len(subscriptions)})

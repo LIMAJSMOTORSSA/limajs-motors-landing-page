@@ -7,7 +7,9 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.response import success, error, get_http_method, get_path_parameters
 from shared.db import put_item, get_item, query_items, scan_items, delete_item, convert_floats
-from boto3.dynamodb.conditions import Key, Attr
+
+# Removing boto3 Key/Attr imports
+# from boto3.dynamodb.conditions import Key, Attr
 
 TABLE_SCHEDULES = os.environ.get('TABLE_SCHEDULES', 'limajs-schedules')
 
@@ -54,7 +56,7 @@ def create_schedule(event):
     
     schedule_id = f"SCHEDULE#{str(uuid.uuid4())}"
     
-    schedule_item = convert_floats({
+    schedule_item = {
         'scheduleId': schedule_id,
         'type': 'DEPARTURE',
         'routeId': body['routeId'],
@@ -65,7 +67,7 @@ def create_schedule(event):
         'isActive': body.get('isActive', True),
         'createdAt': datetime.utcnow().isoformat(),
         'updatedAt': datetime.utcnow().isoformat()
-    })
+    }
     
     put_item(TABLE_SCHEDULES, schedule_item)
     
@@ -88,14 +90,13 @@ def list_schedules(query_params):
     route_id = query_params.get('routeId')
     
     if route_id:
-        # Query avec GSI route-schedules-index
+        # MongoDB Query
         schedules = query_items(
             TABLE_SCHEDULES,
-            Key('routeId').eq(route_id) & Key('type').eq('DEPARTURE'),
-            index_name='route-schedules-index'
+            {'routeId': route_id, 'type': 'DEPARTURE'}
         )
     else:
-        schedules = scan_items(TABLE_SCHEDULES, Attr('type').eq('DEPARTURE'))
+        schedules = scan_items(TABLE_SCHEDULES, {'type': 'DEPARTURE'})
     
     return success({'schedules': schedules, 'count': len(schedules)})
 
@@ -107,22 +108,19 @@ def update_schedule(schedule_id, event):
     if not existing:
         return error(404, "Schedule not found")
     
-    update_expr = "SET updatedAt = :updated"
-    expr_values = {':updated': datetime.utcnow().isoformat()}
+    update_data = { 'updatedAt': datetime.utcnow().isoformat() }
     
     allowed = ['departureTime', 'days', 'busId', 'driverId', 'isActive']
     
     for field in allowed:
         if field in body:
-            update_expr += f", {field} = :{field}"
-            expr_values[f":{field}"] = body[field]
+            update_data[field] = body[field]
     
     from shared.db import update_item
     updated = update_item(
         TABLE_SCHEDULES,
         {'scheduleId': schedule_id, 'type': 'DEPARTURE'},
-        update_expr,
-        convert_floats(expr_values)
+        update_data
     )
     
     return success({'schedule': updated}, "Schedule updated successfully")
@@ -137,8 +135,7 @@ def delete_schedule(schedule_id):
     updated = update_item(
         TABLE_SCHEDULES,
         {'scheduleId': schedule_id, 'type': 'DEPARTURE'},
-        "SET isActive = :active, updatedAt = :updated",
-        {':active': False, ':updated': datetime.utcnow().isoformat()}
+        {'isActive': False, 'updatedAt': datetime.utcnow().isoformat()}
     )
     
     return success({'schedule': updated}, "Schedule deactivated successfully")

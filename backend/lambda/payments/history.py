@@ -7,7 +7,7 @@ from datetime import datetime
 
 import sys
 sys.path.insert(0, '/var/task')
-from shared.db import get_table
+from shared.db import query_items
 from shared.response import success, error, get_user_sub
 
 
@@ -22,24 +22,21 @@ def get_payment_history(event, context):
     limit = int(params.get('limit', 20))
     payment_type = params.get('type')  # 'subscription', 'wallet_recharge', or all
     
-    table = get_table('limajs-payments')
-    
-    query_params = {
-        'KeyConditionExpression': 'userId = :uid',
-        'ExpressionAttributeValues': {':uid': user_id},
-        'ScanIndexForward': False,
-        'Limit': limit
-    }
+    filter_query = {'userId': user_id}
     
     if payment_type:
-        query_params['FilterExpression'] = '#type = :type'
-        query_params['ExpressionAttributeNames'] = {'#type': 'type'}
-        query_params['ExpressionAttributeValues'][':type'] = payment_type
+        filter_query['type'] = payment_type
+        
+    response = query_items('limajs-payments', filter_query)
     
-    response = table.query(**query_params)
+    # Sort by date descending (most recent first)
+    response.sort(key=lambda x: x.get('submittedAt') or x.get('createdAt', ''), reverse=True)
+    
+    # Apply limit
+    response = response[:limit]
     
     payments = []
-    for item in response.get('Items', []):
+    for item in response:
         payment = {
             'paymentId': item.get('paymentId'),
             'date': item.get('submittedAt', item.get('createdAt', '')),

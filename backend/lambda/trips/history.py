@@ -7,7 +7,7 @@ from datetime import datetime
 
 import sys
 sys.path.insert(0, '/var/task')
-from shared.db import get_table
+from shared.db import query_items, get_item
 from shared.response import success, error, get_user_sub
 
 
@@ -24,36 +24,36 @@ def get_trip_history(event, context):
     end_date = params.get('endDate')
     
     # Query passenger trip records
-    table = get_table('limajs-passenger-trips')
-    
-    query_params = {
-        'KeyConditionExpression': 'passengerId = :pid',
-        'ExpressionAttributeValues': {':pid': user_id},
-        'ScanIndexForward': False,  # Most recent first
-        'Limit': limit
-    }
+    # Query passenger trip records (limajs-passenger-trips)
+    filter_query = {'passengerId': user_id}
     
     # Add date filter if provided
     if start_date and end_date:
-        query_params['FilterExpression'] = '#date BETWEEN :start AND :end'
-        query_params['ExpressionAttributeNames'] = {'#date': 'date'}
-        query_params['ExpressionAttributeValues'][':start'] = start_date
-        query_params['ExpressionAttributeValues'][':end'] = end_date
+        filter_query['date'] = {'$gte': start_date, '$lte': end_date}
+        
+    response = query_items('limajs-passenger-trips', filter_query)
     
-    response = table.query(**query_params)
+    # Sort in memory (most recent first) - equivalent to ScanIndexForward: False
+    response.sort(key=lambda x: x.get('date', ''), reverse=True)
+    
+    # Apply limit
+    response = response[:limit]
     
     # Get route names
-    routes_table = get_table('limajs-routes')
     route_cache = {}
     
+
+    
     trips = []
-    for item in response.get('Items', []):
+    for item in response:
         route_id = item.get('routeId')
         
         # Get route name (with caching)
+        # Get route name (with caching)
         if route_id and route_id not in route_cache:
-            route_resp = routes_table.get_item(Key={'routeId': route_id, 'type': 'INFO'})
-            route_cache[route_id] = route_resp.get('Item', {}).get('name', 'Route inconnue')
+            # Query routes table
+            route_resp = get_item('limajs-routes', {'routeId': route_id, 'type': 'INFO'})
+            route_cache[route_id] = route_resp.get('name', 'Route inconnue') if route_resp else 'Route inconnue'
         
         trips.append({
             'tripId': item.get('tripId'),

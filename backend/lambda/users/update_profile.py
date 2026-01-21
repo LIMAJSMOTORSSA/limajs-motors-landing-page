@@ -54,28 +54,27 @@ def update_profile(event):
     # Champs modifiables
     allowed_fields = ['name', 'phone', 'address', 'emergencyContact', 'preferredLanguage', 'photoUrl']
     
-    update_expr = "SET updatedAt = :updated"
-    expr_values = {':updated': datetime.utcnow().isoformat()}
-    expr_names = {}
+    update_data = { 'updatedAt': datetime.utcnow().isoformat() }
     
     for field in allowed_fields:
         if field in body:
-            # Gérer les mots réservés DynamoDB
-            safe_field = f"#{field}" if field in ['name'] else field
-            if field in ['name']:
-                expr_names[f"#{field}"] = field
-            update_expr += f", {safe_field} = :{field}"
-            expr_values[f":{field}"] = body[field]
+            update_data[field] = body[field]
     
-    if len(expr_values) == 1:
+    if len(update_data) == 1: # Only updatedAt
+        # If body is empty but we are here, maybe we shouldn't fail or just return existing?
+        # Original code failed if only updatedAt was set? logic was if len(expr_values) == 1.
+        # expr_values had :updated. So if only updated, it failed? 
+        # Actually logic was: "No valid fields to update".
+        # If body has no allowed fields, update_data is just updatedAt.
+        pass # We proceed to update updatedAt at least? Or mimic old behavior?
+        # Old behavior: if len(expr_values) == 1 (just :updated), return error.
+        # So:
         return error(400, "No valid fields to update")
-    
+
     updated = update_item(
         TABLE_USERS,
         {'userId': user_id, 'type': 'PROFILE'},
-        update_expr,
-        convert_floats(expr_values),
-        expr_names if expr_names else None
+        update_data
     )
     
     return success({'profile': updated}, "Profile updated successfully")

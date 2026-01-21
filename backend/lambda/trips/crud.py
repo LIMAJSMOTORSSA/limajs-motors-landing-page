@@ -7,7 +7,9 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.response import success, error
 from shared.db import put_item, get_item, update_item, query_items, convert_floats
-from boto3.dynamodb.conditions import Key, Attr
+
+# Removing boto3 Key/Attr imports
+# from boto3.dynamodb.conditions import Key, Attr
 
 TABLE_TRIPS = os.environ.get('TABLE_TRIPS', 'limajs-trips')
 
@@ -59,7 +61,7 @@ def start_trip(event):
     
     trip_id = f"TRIP#{str(uuid.uuid4())}"
     
-    trip_item = convert_floats({
+    trip_item = {
         'tripId': trip_id,
         'timestamp': datetime.utcnow().isoformat(),
         'busId': body['busId'],
@@ -71,7 +73,7 @@ def start_trip(event):
         'endTime': None,
         'passengerCount': 0,
         'totalRevenue': 0
-    })
+    }
     
     put_item(TABLE_TRIPS, trip_item)
     
@@ -88,7 +90,7 @@ def end_trip(event):
         return error(400, "tripId required")
     
     # Récupérer le voyage
-    trips = query_items(TABLE_TRIPS, Key('tripId').eq(trip_id))
+    trips = query_items(TABLE_TRIPS, {'tripId': trip_id})
     
     if not trips:
         return error(404, "Trip not found")
@@ -102,12 +104,10 @@ def end_trip(event):
     updated = update_item(
         TABLE_TRIPS,
         {'tripId': trip_id, 'timestamp': trip['timestamp']},
-        "SET #status = :status, endTime = :endTime",
         {
-            ':status': 'COMPLETED',
-            ':endTime': datetime.utcnow().isoformat()
-        },
-        {'#status': 'status'}
+            'status': 'COMPLETED',
+            'endTime': datetime.utcnow().isoformat()
+        }
     )
     
     return success({
@@ -128,7 +128,7 @@ def board_passenger(event):
     # Créer l'enregistrement d'embarquement
     boarding_id = str(uuid.uuid4())
     
-    boarding_item = convert_floats({
+    boarding_item = {
         'tripId': trip_id,
         'boardingId': f"BOARD#{boarding_id}",
         'passengerId': passenger_id,
@@ -136,19 +136,19 @@ def board_passenger(event):
         'boardingTime': datetime.utcnow().isoformat(),
         'stopId': body.get('stopId'),  # Arrêt d'embarquement
         'alightingStopId': None  # Sera rempli au débarquement
-    })
+    }
     
     put_item(TABLE_TRIPS, boarding_item)
     
     # Incrémenter le compteur de passagers du voyage
-    trips = query_items(TABLE_TRIPS, Key('tripId').eq(trip_id))
+    trips = query_items(TABLE_TRIPS, {'tripId': trip_id})
     if trips:
         trip = trips[0]
+        # Atomic Increment calling updated update_item
         update_item(
             TABLE_TRIPS,
             {'tripId': trip_id, 'timestamp': trip['timestamp']},
-            "SET passengerCount = passengerCount + :inc",
-            {':inc': 1}
+            {'$inc': {'passengerCount': 1}}
         )
     
     return success({
@@ -164,9 +164,13 @@ def get_passengers(event):
         return error(400, "tripId required")
     
     # Query tous les embarquements
+    # Key('boardingId').begins_with('BOARD#') -> regex
     boardings = query_items(
         TABLE_TRIPS,
-        Key('tripId').eq(trip_id) & Key('boardingId').begins_with('BOARD#')
+        {
+            'tripId': trip_id,
+            'boardingId': {'$regex': '^BOARD#'}
+        }
     )
     
     # Filtrer pour ne garder que les passagers encore à bord (pas de alightingTime)
@@ -204,15 +208,14 @@ def alight_passenger(event):
     updated = update_item(
         TABLE_TRIPS,
         {'tripId': trip_id, 'boardingId': boarding_id},
-        "SET alightingTime = :alight, alightingStopId = :stop",
         {
-            ':alight': datetime.utcnow().isoformat(),
-            ':stop': body.get('stopId')
+            'alightingTime': datetime.utcnow().isoformat(),
+            'alightingStopId': body.get('stopId')
         }
     )
     
     # Décrémenter le compteur de passagers à bord
-    trips = query_items(TABLE_TRIPS, Key('tripId').eq(trip_id))
+    trips = query_items(TABLE_TRIPS, {'tripId': trip_id})
     if trips:
         trip = trips[0]
         current_count = trip.get('passengerCount', 0)
@@ -220,8 +223,7 @@ def alight_passenger(event):
             update_item(
                 TABLE_TRIPS,
                 {'tripId': trip_id, 'timestamp': trip['timestamp']},
-                "SET passengerCount = passengerCount - :dec",
-                {':dec': 1}
+                {'$inc': {'passengerCount': -1}}
             )
     
     return success({

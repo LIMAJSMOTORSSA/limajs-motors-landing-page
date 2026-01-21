@@ -5,7 +5,7 @@ import boto3
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.db import query_items, scan_items
-from boto3.dynamodb.conditions import Key, Attr
+from shared.db import query_items, scan_items
 
 TABLE_CONNECTIONS = os.environ.get('TABLE_CONNECTIONS', 'limajs-websocket-connections')
 WEBSOCKET_API_ENDPOINT = os.environ.get('VITE_WEBSOCKET_URL', '').replace('wss://', 'https://')
@@ -45,10 +45,10 @@ def lambda_handler(event, context):
             return {'statusCode': 400}
         
         # Récupérer toutes les connexions abonnées à cette route
+        # Récupérer toutes les connexions abonnées à cette route
         connections = query_items(
             TABLE_CONNECTIONS,
-            Key('routeId').eq(route_id),
-            index_name='route-connections-index'
+            {'routeId': route_id}
         )
         
         if not connections:

@@ -7,7 +7,9 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.response import success, error, get_http_method, get_path_parameters
 from shared.db import put_item, get_item, scan_items, delete_item, update_item, convert_floats, query_items
-from boto3.dynamodb.conditions import Key, Attr
+
+# Removing boto3
+# from boto3.dynamodb.conditions import Key, Attr
 
 TABLE_ROUTES = os.environ.get('TABLE_ROUTES', 'limajs-routes')
 
@@ -54,7 +56,7 @@ def create_route(event):
     
     route_id = f"ROUTE#{str(uuid.uuid4())}"
     
-    route_item = convert_floats({
+    route_item = {
         'routeId': route_id,
         'stopIndex': 'METADATA',
         'name': body['name'],
@@ -67,14 +69,14 @@ def create_route(event):
         'totalDistance': body.get('totalDistance', 0),  # km
         'createdAt': datetime.utcnow().isoformat(),
         'updatedAt': datetime.utcnow().isoformat()
-    })
+    }
     
     put_item(TABLE_ROUTES, route_item)
     
     # Ajouter les arrêts
     stops = body['stops']
     for idx, stop in enumerate(stops):
-        stop_item = convert_floats({
+        stop_item = {
             'routeId': route_id,
             'stopIndex': f"STOP#{idx:03d}",  # STOP#000, STOP#001, etc.
             'name': stop['name'],
@@ -82,7 +84,7 @@ def create_route(event):
             'longitude': stop['longitude'],
             'order': idx,
             'estimatedTime': stop.get('estimatedTime', 0)  # minutes depuis départ
-        })
+        }
         put_item(TABLE_ROUTES, stop_item)
     
     return success({'route': route_item, 'stopsCount': len(stops)}, "Route created successfully")
@@ -99,9 +101,14 @@ def get_route(route_id):
         return error(404, "Route not found")
     
     # Récupérer tous les arrêts
+    # Dynamo uses Key('stopIndex').begins_with('STOP#')
+    # MongoDB regex: '^STOP#'
     stops = query_items(
         TABLE_ROUTES,
-        Key('routeId').eq(route_id) & Key('stopIndex').begins_with('STOP#')
+        {
+            'routeId': route_id,
+            'stopIndex': {'$regex': '^STOP#'}
+        }
     )
     
     # Trier par ordre
@@ -114,7 +121,7 @@ def get_route(route_id):
 
 def list_routes():
     """Lister toutes les lignes (sans les arrêts)."""
-    routes = scan_items(TABLE_ROUTES, Attr('stopIndex').eq('METADATA'))
+    routes = scan_items(TABLE_ROUTES, {'stopIndex': 'METADATA'})
     return success({'routes': routes, 'count': len(routes)})
 
 def update_route(route_id, event):
@@ -125,21 +132,18 @@ def update_route(route_id, event):
     if not existing:
         return error(404, "Route not found")
     
-    update_expr = "SET updatedAt = :updated"
-    expr_values = {':updated': datetime.utcnow().isoformat()}
+    update_data = { 'updatedAt': datetime.utcnow().isoformat() }
     
     allowed = ['name', 'description', 'isActive', 'color', 'price', 'estimatedDuration', 'totalDistance']
     
     for field in allowed:
         if field in body:
-            update_expr += f", {field} = :{field}"
-            expr_values[f":{field}"] = body[field]
+            update_data[field] = body[field]
     
     updated = update_item(
         TABLE_ROUTES,
         {'routeId': route_id, 'stopIndex': 'METADATA'},
-        update_expr,
-        convert_floats(expr_values)
+        update_data
     )
     
     return success({'route': updated}, "Route updated successfully")
@@ -153,8 +157,7 @@ def delete_route(route_id):
     updated = update_item(
         TABLE_ROUTES,
         {'routeId': route_id, 'stopIndex': 'METADATA'},
-        "SET isActive = :active, updatedAt = :updated",
-        {':active': False, ':updated': datetime.utcnow().isoformat()}
+        {'isActive': False, 'updatedAt': datetime.utcnow().isoformat()}
     )
     
     return success({'route': updated}, "Route deactivated successfully")

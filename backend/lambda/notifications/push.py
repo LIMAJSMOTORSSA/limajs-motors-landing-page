@@ -9,7 +9,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.response import success, error
 from shared.db import get_item, put_item, query_items, scan_items, update_item, convert_floats
 from shared.secrets import get_secret
-from boto3.dynamodb.conditions import Key, Attr
+
+# Removing boto3 Key/Attr imports
+# from boto3.dynamodb.conditions import Key, Attr
 
 TABLE_USERS = os.environ.get('TABLE_USERS', 'limajs-users')
 TABLE_NOTIFICATIONS = os.environ.get('TABLE_NOTIFICATIONS', 'limajs-notifications')
@@ -62,11 +64,10 @@ def register_device(event):
     updated = update_item(
         TABLE_USERS,
         {'userId': user_id, 'type': 'PROFILE'},
-        "SET fcmToken = :token, fcmPlatform = :platform, tokenUpdatedAt = :updated",
         {
-            ':token': device_token,
-            ':platform': platform,
-            ':updated': datetime.utcnow().isoformat()
+            'fcmToken': device_token,
+            'fcmPlatform': platform,
+            'tokenUpdatedAt': datetime.utcnow().isoformat()
         }
     )
     
@@ -184,7 +185,11 @@ def broadcast_notification(event):
         return error(400, "title and message required")
     
     # Récupérer tous les users avec un FCM token
-    all_users = scan_items(TABLE_USERS, Attr('fcmToken').exists() & Attr('type').eq('PROFILE'))
+    # Scan with filter: {'fcmToken': {'$exists': True}, 'type': 'PROFILE'}
+    all_users = scan_items(
+        TABLE_USERS, 
+        {'fcmToken': {'$exists': True}, 'type': 'PROFILE'}
+    )
     
     if role_filter:
         all_users = [u for u in all_users if u.get('role') == role_filter]
@@ -235,7 +240,7 @@ def get_notification_history(event):
     # Query notifications de l'utilisateur
     notifications = query_items(
         TABLE_NOTIFICATIONS,
-        Key('userId').eq(user_id)
+        {'userId': user_id}
     )
     
     # Trier par date (plus récent en premier)

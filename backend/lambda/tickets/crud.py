@@ -10,7 +10,9 @@ from datetime import datetime, timedelta
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.response import success, error, get_http_method, get_path_parameters, get_user_sub
 from shared.db import put_item, get_item, query_items, convert_floats
-from boto3.dynamodb.conditions import Key, Attr
+
+# Removing boto3 Key/Attr imports
+# from boto3.dynamodb.conditions import Key, Attr
 
 TABLE_TICKETS = os.environ.get('TABLE_TICKETS', 'limajs-tickets')
 TABLE_SUBSCRIPTIONS = os.environ.get('TABLE_SUBSCRIPTIONS', 'limajs-subscriptions')
@@ -53,10 +55,14 @@ def generate_ticket(event):
     user_id = f"USER#{user_sub}"
     
     # Vérifier abonnement actif
+    # Mongo: {'userId': user_id, 'status': 'ACTIVE', 'endDate': {'$gte': now_iso}}
     subscriptions = query_items(
         TABLE_SUBSCRIPTIONS,
-        Key('userId').eq(user_id),
-        Attr('status').eq('ACTIVE') & Attr('endDate').gte(datetime.utcnow().isoformat())
+        {
+            'userId': user_id, 
+            'status': 'ACTIVE',
+            'endDate': {'$gte': datetime.utcnow().isoformat()}
+        }
     )
     
     if not subscriptions:
@@ -67,17 +73,17 @@ def generate_ticket(event):
     created_at = datetime.utcnow()
     expires_at = created_at + timedelta(minutes=15)  # Ticket valide 15 min
     
-    ticket_item = convert_floats({
+    ticket_item = {
         'ticketId': ticket_id,
         'createdAt': created_at.isoformat(),
         'userId': user_id,
         'subscriptionId': subscriptions[0]['subscriptionId'],
         'status': 'ACTIVE',  # ACTIVE, USED, EXPIRED
-        'ttl': int(expires_at.timestamp()),  # Pour auto-suppression DynamoDB
+        'ttl': int(expires_at.timestamp()),  # Pour auto-suppression DynamoDB (Legacy)
         'routeId': body.get('routeId'),  # Optionnel
         'validatedAt': None,
         'validatedBy': None
-    })
+    }
     
     put_item(TABLE_TICKETS, ticket_item)
     
@@ -120,9 +126,11 @@ def validate_ticket(event):
         return error(401, "Unauthorized")
     
     # Query ticket
+    # In legacy code it used query_items on a specific single key? Or Key('ticketId').eq(ticket_id)
+    # If ticketId is unique, we should find one.
     tickets = query_items(
         TABLE_TICKETS,
-        Key('ticketId').eq(ticket_id)
+        {'ticketId': ticket_id}
     )
     
     if not tickets:
@@ -139,13 +147,11 @@ def validate_ticket(event):
     updated = update_item(
         TABLE_TICKETS,
         {'ticketId': ticket_id, 'createdAt': ticket['createdAt']},
-        "SET #status = :status, validatedAt = :validated, validatedBy = :driver",
         {
-            ':status': 'USED',
-            ':validated': datetime.utcnow().isoformat(),
-            ':driver': f"USER#{driver_sub}"
-        },
-        {'#status': 'status'}
+            'status': 'USED',
+            'validatedAt': datetime.utcnow().isoformat(),
+            'validatedBy': f"USER#{driver_sub}"
+        }
     )
     
     return success({
@@ -162,11 +168,10 @@ def get_ticket_history(event):
     
     user_id = f"USER#{user_sub}"
     
-    # Query avec GSI user-tickets-index
+    # Query avec GSI user-tickets-index (Mongo just filter on userId)
     tickets = query_items(
         TABLE_TICKETS,
-        Key('userId').eq(user_id),
-        index_name='user-tickets-index'
+        {'userId': user_id}
     )
     
     return success({'tickets': tickets, 'count': len(tickets)})
