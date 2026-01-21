@@ -27,6 +27,7 @@ def lambda_handler(event, context):
     Routes:
     - GET /admin/users -> Liste tous les utilisateurs
     - GET /admin/users/{userId} -> Détails d'un utilisateur
+    - POST /admin/users -> Créer un utilisateur
     - PUT /admin/users/{userId}/suspend -> Suspendre un utilisateur
     - PUT /admin/users/{userId}/activate -> Réactiver un utilisateur
     - GET /admin/users/{userId}/activity -> Activité d'un utilisateur
@@ -46,10 +47,108 @@ def lambda_handler(event, context):
             return get_user_details(path_parameters['userId'])
         elif http_method == 'GET':
             return list_users(event)
+        elif http_method == 'POST':
+            return create_user(event)
         else:
             return error(400, "Invalid request")
     except Exception as e:
         print(f"Error: {e}")
+        return error(500, str(e))
+
+
+def create_user(event):
+    """Créer un nouvel utilisateur (Cognito + MongoDB profile)."""
+    import json
+    import uuid
+    from shared.db import put_item
+    
+    try:
+        body = json.loads(event.get('body', '{}'))
+    except:
+        body = event.get('body', {})
+        if isinstance(body, str):
+            body = json.loads(body)
+    
+    # Validation
+    required = ['email', 'password', 'firstName', 'lastName', 'role']
+    for field in required:
+        if field not in body:
+            return error(400, f"Missing required field: {field}")
+    
+    email = body['email']
+    password = body['password']
+    first_name = body['firstName']
+    last_name = body['lastName']
+    role = body['role']
+    phone = body.get('phone', '')
+    
+    try:
+        # Create user in Cognito
+        user_attributes = [
+            {'Name': 'email', 'Value': email},
+            {'Name': 'email_verified', 'Value': 'true'},
+            {'Name': 'given_name', 'Value': first_name},
+            {'Name': 'family_name', 'Value': last_name},
+        ]
+        if phone:
+            user_attributes.append({'Name': 'phone_number', 'Value': phone})
+        
+        response = cognito.admin_create_user(
+            UserPoolId=USER_POOL_ID,
+            Username=email,
+            UserAttributes=user_attributes,
+            MessageAction='SUPPRESS'
+        )
+        
+        # Set permanent password
+        cognito.admin_set_user_password(
+            UserPoolId=USER_POOL_ID,
+            Username=email,
+            Password=password,
+            Permanent=True
+        )
+        
+        # Get user sub
+        user_sub = None
+        for attr in response['User'].get('Attributes', []):
+            if attr['Name'] == 'sub':
+                user_sub = attr['Value']
+                break
+        
+        if not user_sub:
+            user_sub = str(uuid.uuid4())
+        
+        user_id = f"USER#{user_sub}"
+        
+        # Create profile in MongoDB
+        profile = {
+            'userId': user_id,
+            'type': 'PROFILE',
+            'email': email,
+            'firstName': first_name,
+            'lastName': last_name,
+            'phone': phone,
+            'role': role,
+            'status': 'ACTIVE',
+            'createdAt': datetime.utcnow().isoformat()
+        }
+        
+        put_item(TABLE_USERS, profile)
+        
+        return success({
+            'data': {
+                'userId': user_id,
+                'email': email,
+                'firstName': first_name,
+                'lastName': last_name,
+                'role': role
+            }
+        }, "User created successfully")
+        
+    except cognito.exceptions.UsernameExistsException:
+        return error(400, "User with this email already exists")
+    except Exception as e:
+        print(f"Error creating user: {e}")
         return error(500, str(e))
 
 def list_users(event):

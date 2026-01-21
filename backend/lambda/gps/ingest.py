@@ -6,9 +6,10 @@ from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.response import success, error
-from shared.db import put_item, convert_floats
+from shared.db import put_item, update_item, convert_floats
 
 TABLE_GPS = os.environ.get('TABLE_GPS', 'limajs-gps-positions')
+TABLE_BUSES = os.environ.get('TABLE_BUSES', 'limajs-buses')
 LOCATION_TRACKER = os.environ.get('AWS_LOCATION_TRACKER_NAME', 'limajs-bus-tracker')
 
 location = boto3.client('location')
@@ -78,6 +79,22 @@ def lambda_handler(event, context):
         })
         
         put_item(TABLE_GPS, gps_item)
+        
+        # Update bus record with latest position (for realtime tracking)
+        try:
+            update_item(
+                TABLE_BUSES,
+                {'busId': bus_id, 'type': 'INFO'},
+                {
+                    'latitude': latest_pos['latitude'],
+                    'longitude': latest_pos['longitude'],
+                    'speed': latest_pos.get('speed', 0),
+                    'heading': latest_pos.get('heading', 0),
+                    'lastHeartbeat': datetime.utcnow().isoformat()
+                }
+            )
+        except Exception as bus_update_err:
+            print(f"⚠️ Could not update bus position: {bus_update_err}")
         
         return success({
             'processed': len(positions),

@@ -19,7 +19,7 @@ _db = None
 
 def get_db():
     global _client, _db
-    if _db:
+    if _db is not None:
         return _db
     
     if not MONGO_URL:
