@@ -36,6 +36,8 @@ def lambda_handler(event, context):
             return get_subscriptions_report(query_parameters)
         elif '/trips' in path:
             return get_trips_report(query_parameters)
+        elif '/health' in path:
+            return check_db_health()
         else:
             return error(400, "Invalid request")
     except Exception as e:
@@ -227,3 +229,23 @@ def get_trips_report(params):
         },
         'byRoute': by_route
     })
+
+def check_db_health():
+    """Vérifie la connexion à la base de données."""
+    try:
+        from shared.db import get_db
+        db = get_db()
+        # Test connection by listing collections (lightweight)
+        cols = db.list_collection_names()
+        return success({
+            'status': 'healthy',
+            'message': 'Database connection successful',
+            'collections': cols,
+            'env': {
+                'has_mongo_url': bool(os.environ.get('MONGO_DB_URL')),
+                'mongo_db_name': os.environ.get('MONGO_DB_NAME')
+            }
+        })
+    except Exception as e:
+        print(f"Health Check Failed: {e}")
+        return error(500, f"Database Connection Failed: {str(e)}")
