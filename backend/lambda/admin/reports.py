@@ -15,6 +15,8 @@ TABLE_SUBSCRIPTIONS = os.environ.get('TABLE_SUBSCRIPTIONS', 'limajs-subscription
 TABLE_TRIPS = os.environ.get('TABLE_TRIPS', 'limajs-trips')
 TABLE_USERS = os.environ.get('TABLE_USERS', 'limajs-users')
 
+import traceback
+
 def lambda_handler(event, context):
     """
     Handler pour rapports financiers admin.
@@ -24,6 +26,7 @@ def lambda_handler(event, context):
     - GET /admin/reports/subscriptions -> Stats abonnements
     - GET /admin/reports/trips -> Stats voyages
     """
+    print(f"Event: {json.dumps(event)}")
     path = event.get('rawPath') or event.get('path', '')
     query_parameters = event.get('queryStringParameters') or {}
     
@@ -42,7 +45,8 @@ def lambda_handler(event, context):
             return error(400, "Invalid request")
     except Exception as e:
         print(f"Error: {e}")
-        return error(500, str(e))
+        traceback.print_exc()
+        return error(500, f"{str(e)} | Details: {traceback.format_exc()}")
 
 def get_dashboard_kpis():
     """KPIs principaux du tableau de bord."""
