@@ -246,6 +246,12 @@ export class LimajsMotorsStack extends cdk.Stack {
             'tripsHistory': createLambda('FnTripsHistory', 'lambda/trips/history.handler'),
             'paymentsHistory': createLambda('FnPaymentsHistory', 'lambda/payments/history.handler'),
             'subscriptionReminder': createLambda('FnSubscriptionReminder', 'lambda/subscriptions/reminder.handler', {}, 60),
+
+            // --- Admin Lambdas ---
+            'adminFleet': createLambda('FnAdminFleet', 'lambda/admin/fleet.lambda_handler'),
+            'adminRoutes': createLambda('FnAdminRoutes', 'lambda/admin/routes.lambda_handler'),
+            'adminSchedules': createLambda('FnAdminSchedules', 'lambda/admin/schedules.lambda_handler'),
+            'adminPayments': createLambda('FnAdminPayments', 'lambda/admin/payments.lambda_handler'),
         };
 
         // Grant Admin permissions to Admin Users Lambda
@@ -357,6 +363,33 @@ export class LimajsMotorsStack extends cdk.Stack {
 
         // Admin (Protected - requires admin role)
         addProtectedRoute('/admin/users', apigwv2.HttpMethod.GET, lambdas.adminUsers);
+        addProtectedRoute('/admin/users/{userId}', apigwv2.HttpMethod.GET, lambdas.adminUsers);
+        addProtectedRoute('/admin/users/{userId}/suspend', apigwv2.HttpMethod.PUT, lambdas.adminUsers);
+        addProtectedRoute('/admin/users/{userId}/activate', apigwv2.HttpMethod.PUT, lambdas.adminUsers);
+
+        // Admin Fleet
+        addProtectedRoute('/admin/buses', apigwv2.HttpMethod.GET, lambdas.adminFleet);
+        addProtectedRoute('/admin/buses', apigwv2.HttpMethod.POST, lambdas.adminFleet);
+        addProtectedRoute('/admin/buses/{busId}', apigwv2.HttpMethod.PUT, lambdas.adminFleet);
+        addProtectedRoute('/admin/buses/{busId}', apigwv2.HttpMethod.DELETE, lambdas.adminFleet);
+
+        // Admin Routes
+        addProtectedRoute('/admin/routes', apigwv2.HttpMethod.GET, lambdas.adminRoutes);
+        addProtectedRoute('/admin/routes', apigwv2.HttpMethod.POST, lambdas.adminRoutes);
+        addProtectedRoute('/admin/routes/{routeId}', apigwv2.HttpMethod.PUT, lambdas.adminRoutes);
+        addProtectedRoute('/admin/routes/{routeId}', apigwv2.HttpMethod.DELETE, lambdas.adminRoutes);
+
+        // Admin Schedules
+        addProtectedRoute('/admin/schedules', apigwv2.HttpMethod.GET, lambdas.adminSchedules);
+        addProtectedRoute('/admin/schedules', apigwv2.HttpMethod.POST, lambdas.adminSchedules);
+        addProtectedRoute('/admin/schedules/{scheduleId}', apigwv2.HttpMethod.PUT, lambdas.adminSchedules);
+        addProtectedRoute('/admin/schedules/{scheduleId}', apigwv2.HttpMethod.DELETE, lambdas.adminSchedules);
+
+        // Admin Payments
+        addProtectedRoute('/admin/payments', apigwv2.HttpMethod.GET, lambdas.adminPayments);
+        addProtectedRoute('/admin/payments/{paymentId}/approve', apigwv2.HttpMethod.POST, lambdas.adminPayments);
+        addProtectedRoute('/admin/payments/{paymentId}/reject', apigwv2.HttpMethod.POST, lambdas.adminPayments);
+
         addProtectedRoute('/admin/reports/dashboard', apigwv2.HttpMethod.GET, lambdas.adminReports);
 
         // Contact Form (Public)

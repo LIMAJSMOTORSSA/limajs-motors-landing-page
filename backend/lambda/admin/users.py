@@ -7,7 +7,9 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.response import success, error, get_http_method, get_path_parameters
 from shared.db import query_items, scan_items, convert_floats
-from boto3.dynamodb.conditions import Key, Attr
+
+# Removing boto3 Key/Attr imports as they are no longer used for DB queries
+# from boto3.dynamodb.conditions import Key, Attr
 
 # Tables
 TABLE_USERS = os.environ.get('TABLE_USERS', 'limajs-users')
@@ -15,7 +17,7 @@ TABLE_SUBSCRIPTIONS = os.environ.get('TABLE_SUBSCRIPTIONS', 'limajs-subscription
 TABLE_PAYMENTS = os.environ.get('TABLE_PAYMENTS', 'limajs-payments')
 TABLE_TRIPS = os.environ.get('TABLE_TRIPS', 'limajs-trips')
 
-# Cognito client
+# Cognito client (Still Boto3)
 cognito = boto3.client('cognito-idp')
 USER_POOL_ID = os.environ.get('COGNITO_USER_POOL_ID')
 
@@ -104,22 +106,25 @@ def get_user_details(user_id):
     """Détails complets d'un utilisateur (Cognito + DynamoDB)."""
     full_user_id = f"USER#{user_id}" if not user_id.startswith('USER#') else user_id
     
-    # Profil DynamoDB
+    # Profil DynamoDB -> MongoDB
     from shared.db import get_item
     profile = get_item(TABLE_USERS, {'userId': full_user_id, 'type': 'PROFILE'})
     
     # Abonnement actif
+    # Key('userId').eq ... -> {'userId': ...}
     subscriptions = query_items(
         TABLE_SUBSCRIPTIONS,
-        Key('userId').eq(full_user_id),
-        Attr('status').eq('ACTIVE')
+        {'userId': full_user_id, 'status': 'ACTIVE'}
     )
     
     # Paiements récents
     payments = scan_items(
         TABLE_PAYMENTS,
-        Attr('userId').eq(full_user_id)
-    )[:10]  # 10 derniers
+        {'userId': full_user_id},
+        limit=10
+    )
+    # Scan logic in db.py passes filter_expression as key_condition to query_items, 
+    # and query_items uses .find(query). So strictly speaking scan_items is same as query_items now.
     
     return success({
         'profile': profile,
@@ -140,14 +145,12 @@ def suspend_user(user_id):
             Username=sub
         )
         
-        # Mettre à jour le profil DynamoDB
+        # Mettre à jour le profil DynamoDB -> MongoDB
         from shared.db import update_item
         update_item(
             TABLE_USERS,
             {'userId': full_user_id, 'type': 'PROFILE'},
-            "SET #status = :status, suspendedAt = :suspended",
-            {':status': 'SUSPENDED', ':suspended': datetime.utcnow().isoformat()},
-            {'#status': 'status'}
+            {'status': 'SUSPENDED', 'suspendedAt': datetime.utcnow().isoformat()}
         )
         
         return success({'userId': full_user_id}, "User suspended successfully")
@@ -173,9 +176,7 @@ def activate_user(user_id):
         update_item(
             TABLE_USERS,
             {'userId': full_user_id, 'type': 'PROFILE'},
-            "SET #status = :status, reactivatedAt = :reactivated",
-            {':status': 'ACTIVE', ':reactivated': datetime.utcnow().isoformat()},
-            {'#status': 'status'}
+            {'status': 'ACTIVE', 'reactivatedAt': datetime.utcnow().isoformat()}
         )
         
         return success({'userId': full_user_id}, "User activated successfully")
@@ -191,19 +192,21 @@ def get_user_activity(user_id):
     # Voyages (en tant que passager)
     trips_as_passenger = scan_items(
         TABLE_TRIPS,
-        Attr('passengerId').eq(full_user_id)
+        {'passengerId': full_user_id}
     )
     
     # Voyages (en tant que chauffeur)
+    # Complex query: driverId=... AND timestamp exists.
+    # Mongo: {'driverId': ..., 'timestamp': {'$exists': True}}
     trips_as_driver = scan_items(
         TABLE_TRIPS,
-        Attr('driverId').eq(full_user_id) & Attr('timestamp').exists()
+        {'driverId': full_user_id, 'timestamp': {'$exists': True}}
     )
     
     # Paiements
     payments = scan_items(
         TABLE_PAYMENTS,
-        Attr('userId').eq(full_user_id)
+        {'userId': full_user_id}
     )
     
     return success({

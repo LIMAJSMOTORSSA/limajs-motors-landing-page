@@ -7,7 +7,7 @@ from decimal import Decimal
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from shared.response import success, error
 from shared.db import scan_items, query_items, convert_floats
-from boto3.dynamodb.conditions import Key, Attr
+# from boto3.dynamodb.conditions import Key, Attr
 
 # Tables
 TABLE_PAYMENTS = os.environ.get('TABLE_PAYMENTS', 'limajs-payments')
@@ -48,19 +48,19 @@ def get_dashboard_kpis():
     month_start = datetime.utcnow().replace(day=1).date().isoformat()
     
     # Paiements approuvés ce mois
-    all_payments = scan_items(TABLE_PAYMENTS, Attr('status').eq('APPROVED'))
+    all_payments = scan_items(TABLE_PAYMENTS, {'status': 'APPROVED'})
     monthly_payments = [p for p in all_payments if p.get('approvedAt', '').startswith(month_start[:7])]
     monthly_revenue = sum(float(p.get('amount', 0)) for p in monthly_payments)
     
     # Paiements en attente
-    pending_payments = scan_items(TABLE_PAYMENTS, Attr('status').eq('PENDING'))
+    pending_payments = scan_items(TABLE_PAYMENTS, {'status': 'PENDING'})
     pending_amount = sum(float(p.get('amount', 0)) for p in pending_payments)
     
     # Abonnements actifs
-    active_subs = scan_items(TABLE_SUBSCRIPTIONS, Attr('status').eq('ACTIVE'))
+    active_subs = scan_items(TABLE_SUBSCRIPTIONS, {'status': 'ACTIVE'})
     
     # Voyages aujourd'hui
-    all_trips = scan_items(TABLE_TRIPS, Attr('timestamp').exists())
+    all_trips = scan_items(TABLE_TRIPS, {'timestamp': {'$exists': True}})
     trips_today = [t for t in all_trips if t.get('startTime', '').startswith(today)]
     
     # Passagers aujourd'hui (somme des passengerCount)
@@ -99,7 +99,7 @@ def get_revenue_report(params):
     period = params.get('period', 'month')  # day, week, month, year
     
     # Récupérer tous les paiements approuvés
-    payments = scan_items(TABLE_PAYMENTS, Attr('status').eq('APPROVED'))
+    payments = scan_items(TABLE_PAYMENTS, {'status': 'APPROVED'})
     
     # Grouper par période
     revenue_by_period = {}
@@ -186,7 +186,7 @@ def get_trips_report(params):
     """Rapport sur les voyages."""
     period = params.get('period', 'today')
     
-    all_trips = scan_items(TABLE_TRIPS, Attr('timestamp').exists())
+    all_trips = scan_items(TABLE_TRIPS, {'timestamp': {'$exists': True}})
     
     # Filtrer par période
     now = datetime.utcnow()
