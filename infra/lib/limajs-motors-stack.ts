@@ -392,7 +392,7 @@ export class LimajsMotorsStack extends cdk.Stack {
         addProtectedRoute('/admin/payments/{paymentId}/approve', apigwv2.HttpMethod.POST, lambdas.adminPayments);
         addProtectedRoute('/admin/payments/{paymentId}/reject', apigwv2.HttpMethod.POST, lambdas.adminPayments);
 
-        addProtectedRoute('/admin/reports/dashboard', apigwv2.HttpMethod.GET, lambdas.adminReports);
+        addProtectedRoute('/admin/reports/{proxy+}', apigwv2.HttpMethod.ANY, lambdas.adminReports);
 
         // Contact Form (Public)
         addPublicRoute('/contact', apigwv2.HttpMethod.POST, lambdas.contactForm);
