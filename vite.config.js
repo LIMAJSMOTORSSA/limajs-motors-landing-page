@@ -12,10 +12,12 @@ export default defineConfig({
     port: 3000,
     host: true, // Toujours utile pour Docker ou l'exposition locale
     // Le bloc 'proxy' a été supprimé car Amplify Client gère la connexion
+    allowedHosts: ['limajsmotors.com', 'localhost', '127.0.0.1'],
   },
   preview: {
     port: 3000,
     // Le bloc 'proxy' a été supprimé ici aussi
+    allowedHosts: ['limajsmotors.com', 'localhost', '127.0.0.1'],
   },
   resolve: {
     alias: {
