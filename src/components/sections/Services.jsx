@@ -1,11 +1,13 @@
 import Section from '../ui/Section';
 import { audiences, circuitsAnnonces2025, origin } from '../../data/newsletters';
 
-import schoolImage from '../../assets/images/service/cite-du-savoir.webp';
 import groupImage from '../../assets/images/service/groupe-ecoliers.webp';
-import boardingImage from '../../assets/images/service/embarquement.webp';
-import tripImage from '../../assets/images/service/trajet-quotidien.webp';
 import carteEcoliers from '../../assets/images/cards/carte-ecoliers.webp';
+
+// Illustrations pour la section « Pour qui nous roulons ».
+import ecoliersImage from '../../assets/images/editorial/school-boarding.webp';
+import universitairesImage from '../../assets/images/editorial/university-commute.webp';
+import professionnelsImage from '../../assets/images/editorial/professional-commute.webp';
 
 const PASSENGER_URL = 'https://passenger.limajs.com';
 
@@ -46,7 +48,7 @@ const serviceTypes = [
   },
 ];
 
-const audienceImages = [schoolImage, boardingImage, tripImage];
+const audienceImages = [ecoliersImage, universitairesImage, professionnelsImage];
 
 const Services = () => (
   <Section

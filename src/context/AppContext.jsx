@@ -5,6 +5,9 @@ import { createContext, useContext, useState, useEffect } from 'react';
 // Création du contexte
 const AppContext = createContext();
 
+// Clé de stockage du choix de thème de l'utilisateur.
+const THEME_STORAGE_KEY = 'limajs-theme';
+
 // Hook personnalisé pour utiliser le contexte
 export const useAppContext = () => useContext(AppContext);
 
@@ -40,39 +43,36 @@ export const AppProvider = ({ children }) => {
     };
   }, []);
   
-  // Détection des préférences de thème système
+  /**
+   * Thème : le mode clair est le défaut. Le mode sombre ne s'active que si
+   * l'utilisateur l'a choisi explicitement via le bouton, et ce choix est
+   * conservé d'une visite à l'autre. La préférence système n'est
+   * volontairement pas suivie : elle imposait le thème sombre à des
+   * visiteurs qui ne l'avaient pas demandé pour ce site.
+   */
   useEffect(() => {
-    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setIsDarkMode(prefersDarkMode);
-    
-    // Appliquer le mode sombre au document si nécessaire
-    if (prefersDarkMode) {
-      document.documentElement.classList.add('dark');
+    let stored = null;
+    try {
+      stored = localStorage.getItem(THEME_STORAGE_KEY);
+    } catch {
+      // localStorage indisponible (navigation privée, cookies bloqués) :
+      // on reste simplement sur le thème clair.
     }
-    
-    // Écouteur pour les changements de préférences
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e) => {
-      setIsDarkMode(e.matches);
-      if (e.matches) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    };
-    
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+
+    const useDark = stored === 'dark';
+    setIsDarkMode(useDark);
+    document.documentElement.classList.toggle('dark', useDark);
   }, []);
-  
+
   // Fonction pour basculer le mode sombre manuellement
   const toggleDarkMode = () => {
     setIsDarkMode(prev => {
       const newValue = !prev;
-      if (newValue) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
+      document.documentElement.classList.toggle('dark', newValue);
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, newValue ? 'dark' : 'light');
+      } catch {
+        // Si le stockage est indisponible, le choix ne vaut que pour la session.
       }
       return newValue;
     });

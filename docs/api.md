@@ -571,14 +571,48 @@ Valide une carte NFC scannée.
 
 #### POST /contact
 
+Envoie le message à `ADMIN_EMAILS` via Resend et renvoie un accusé de réception
+automatique au visiteur. L'en-tête `Reply-To` de la notification est l'email du
+visiteur, ce qui permet de lui répondre directement.
+
 **Request Body:**
 ```json
 {
   "name": "Jean Dupont",
   "email": "jean@example.com",
-  "message": "Question about your service..."
+  "phone": "+509 41 70 4234",
+  "message": "Question sur votre service de transport scolaire...",
+  "company": ""
 }
 ```
+
+| Champ | Requis | Contraintes |
+|-------|--------|-------------|
+| `name` | ✅ | 1 à 100 caractères |
+| `email` | ✅ | format email valide, max 150 caractères |
+| `phone` | ❌ | max 30 caractères |
+| `message` | ✅ | 10 à 2000 caractères |
+| `company` | ❌ | champ piège anti-robot : doit rester vide. S'il est rempli, la requête renvoie `200` sans envoyer d'email. |
+
+**Réponses:**
+
+```json
+{ "success": true, "message": "Message envoyé avec succès!" }
+```
+
+| Code | Cas |
+|------|-----|
+| 200 | Message envoyé (ou piège anti-robot déclenché) |
+| 400 | Champ manquant, email invalide, message trop court ou champ trop long |
+| 500 | `RESEND_API_KEY` absente ou échec de l'envoi |
+
+**Configuration (AWS Secrets Manager, secret `limajs/backend/production`):**
+
+| Clé | Rôle |
+|-----|------|
+| `RESEND_API_KEY` | Clé API Resend |
+| `FROM_EMAIL` | Expéditeur, sur un domaine vérifié dans Resend (`limajs.com`) |
+| `ADMIN_EMAILS` | Destinataires, séparés par des virgules |
 
 ---
 
