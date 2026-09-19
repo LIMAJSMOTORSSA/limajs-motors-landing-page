@@ -234,10 +234,37 @@ export const scrollReveal = {
   },
 };
 
-// Configuration pour l'intersection observer
+// Configuration pour l'intersection observer (react-intersection-observer)
 export const observerConfig = {
   threshold: 0.1,
   triggerOnce: true,
+};
+
+/**
+ * Configuration `viewport` pour framer-motion.
+ * framer-motion attend `once` et `amount` — et non `triggerOnce`/`threshold`,
+ * qui appartiennent à react-intersection-observer. Sans `once: true`, les
+ * sections redeviennent invisibles dès qu'elles sortent de l'écran.
+ */
+export const motionViewport = {
+  once: true,
+  amount: 0.1,
+};
+
+// Variante de révélation au défilement pour les titres (noms hidden/visible).
+export const titleReveal = {
+  hidden: {
+    y: 60,
+    opacity: 0,
+  },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.6,
+      ease: easing.smooth,
+    },
+  },
 };
 
 // Exemple d'utilisation dans un composant:

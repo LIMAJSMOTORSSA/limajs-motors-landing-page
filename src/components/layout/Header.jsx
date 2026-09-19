@@ -9,6 +9,7 @@ const links = [
   { to: '/services', label: 'Services' },
   { to: '/a-propos', label: 'À propos' },
   { to: '/investir', label: 'Investir' },
+  { to: '/infolettres', label: 'Infolettres' },
   { to: '/partenaires', label: 'Partenaires' },
   { to: '/contact', label: 'Contact' },
 ];
@@ -31,7 +32,7 @@ const Header = () => {
         </nav>
         <div className="flex items-center gap-2">
           <button onClick={toggleDarkMode} className="p-2 text-stone-700 hover:text-primary dark:text-stone-200" aria-label={isDarkMode ? 'Passer au mode clair' : 'Passer au mode sombre'}>{isDarkMode ? <Sun size={19} /> : <Moon size={19} />}</button>
-          <a href="https://limajs.com/api/passenger/login/" target="_blank" rel="noreferrer" className="hidden border border-stone-900 px-5 py-2.5 text-sm font-semibold text-stone-900 transition-colors hover:bg-stone-900 hover:text-white md:inline-flex dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-stone-900">Login</a>
+          <a href="https://passenger.limajs.com" target="_blank" rel="noreferrer" className="hidden border border-stone-900 px-5 py-2.5 text-sm font-semibold text-stone-900 transition-colors hover:bg-stone-900 hover:text-white md:inline-flex dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-stone-900">Login</a>
           <button onClick={toggleMobileMenu} className="p-2 lg:hidden" aria-label={isMobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}>{isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}</button>
         </div>
       </div>
@@ -40,7 +41,7 @@ const Header = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-x-0 top-[77px] bottom-0 bg-white px-5 py-10 dark:bg-stone-950 lg:hidden">
             <nav className="flex flex-col" aria-label="Navigation mobile">
               {links.map((link) => <NavLink key={link.to} to={link.to} onClick={closeMobileMenu} className="border-b border-stone-200 py-5 text-2xl font-semibold dark:border-stone-800">{link.label}</NavLink>)}
-              <a href="https://limajs.com/api/passenger/login/" target="_blank" rel="noreferrer" onClick={closeMobileMenu} className="mt-10 bg-primary px-6 py-4 text-center font-semibold text-white">Login</a>
+              <a href="https://passenger.limajs.com" target="_blank" rel="noreferrer" onClick={closeMobileMenu} className="mt-10 bg-primary px-6 py-4 text-center font-semibold text-white">Login</a>
             </nav>
           </motion.div>
         )}

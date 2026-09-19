@@ -1,52 +1,130 @@
 import { Link } from 'react-router-dom';
 import Section from '../ui/Section';
-import passengerImage from '../../assets/images/editorial/passenger-community.webp';
-import driverImage from '../../assets/images/editorial/driver-operations.webp';
-import schoolImage from '../../assets/images/editorial/school-arrival.webp';
-import waitingImage from '../../assets/images/editorial/waiting-point.webp';
+import {
+  origin,
+  vision,
+  mission,
+  audiences,
+  values,
+  realisations,
+  bilan2026,
+  bilanDeuxAns,
+} from '../../data/newsletters';
 
-const historyItems = [
-  ['Septembre 2021', 'Création de LIMAJS MOTORS SA', 'LIMAJS MOTORS SA voit le jour. Le nom est un acronyme qui réunit les noms/prénoms des initiateurs du projet: Lina Joseph Charles, Michel Jacky, Antenor Wilner, Janvier Noldey Jean Sonold et Sandro Serges Louis.'],
-  ['Octobre 2021', 'Acquisition des premiers véhicules', 'Début des opérations avec une flotte initiale de bus modernes et confortables.'],
-  ['Janvier 2022', "Lancement des services d'abonnement", "Introduction des formules d'abonnement pour les trajets réguliers."],
-  ['Avril 2022', 'Intégration de la technologie NFC', 'Déploiement du système de paiement sans contact par carte NFC.'],
+import communityImage from '../../assets/images/service/groupe-ecoliers.webp';
+import routeImage from '../../assets/images/service/route-milot.webp';
+import schoolImage from '../../assets/images/service/cite-du-savoir.webp';
+import boardingImage from '../../assets/images/service/embarquement.webp';
+
+// Chiffres repris littéralement de l'Infolettre Août 2026 (bilan et perspectives).
+const figures = [
+  [String(bilan2026.actionnaires), 'Actionnaires réunis depuis le lancement'],
+  [bilan2026.manifestationInteret, `Manifestation d'intérêt, sur un objectif de ${bilan2026.objectifFinancement}`],
+  [bilan2026.chiffreAffaires2026, "Chiffre d'affaires de l'année 2026"],
+  ['01 oct. 2024', 'Lancement du service à la Cité du Savoir'],
 ];
 
-const stats = [['10+', 'Itinéraires'], ['1000+', 'Passagers'], ['99%', 'Ponctualité'], ['100%', 'Sécurité']];
-const impact = [['11+', 'Emplois créés dès la première année'], ['Mobilité', 'Amélioration de la mobilité urbaine'], ['Solutions', 'Aux problèmes de transport quotidien'], ['Écologie', 'Technologie écoénergétique et durable']];
-
 const About = () => (
-  <Section id="about" title="À Propos de LIMAJS MOTORS" subtitle="Notre mission est de révolutionner le transport en commun dans le Nord d'Haïti." bgColor="bg-[#f6f4ef] dark:bg-stone-950">
+  <Section
+    id="about"
+    title="À Propos de LIMAJS MOTORS"
+    subtitle="Connecter les gens et les communautés par le transport."
+    bgColor="bg-[#f6f4ef] dark:bg-stone-950"
+  >
     <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
       <div className="lg:sticky lg:top-28">
-        <img src={passengerImage} alt="" className="aspect-[4/5] w-full object-cover" loading="lazy" />
+        <img src={communityImage} alt="Écoliers transportés par LIMAJS MOTORS SA devant le véhicule du service" className="aspect-[4/5] w-full object-cover" loading="lazy" />
         <div className="grid grid-cols-2 border-x border-b border-stone-300 dark:border-stone-700">
-          {stats.map(([value, label]) => <div key={label} className="border-r border-t border-stone-300 p-5 last:border-r-0 dark:border-stone-700"><p className="text-3xl font-semibold text-primary">{value}</p><p className="mt-1 text-sm text-stone-600 dark:text-stone-300">{label}</p></div>)}
+          {figures.map(([value, label]) => (
+            <div key={label} className="border-r border-t border-stone-300 p-5 last:border-r-0 dark:border-stone-700">
+              <p className="text-2xl font-semibold leading-tight text-primary">{value}</p>
+              <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">{label}</p>
+            </div>
+          ))}
         </div>
+        <p className="mt-3 text-xs text-stone-500 dark:text-stone-400">Source : Infolettre Août 2026.</p>
       </div>
+
       <div className="lg:pt-16">
         <h3 className="text-3xl font-semibold text-primary">Notre Vision</h3>
-        <p className="mt-6 text-lg leading-relaxed text-stone-600 dark:text-stone-300">Nous sommes dédiés à révolutionner le transport en commun dans le Nord d&apos;Haïti. Notre vision est de créer un réseau de transport moderne, fiable et accessible à tous.</p>
-        <p className="mt-5 text-lg leading-relaxed text-stone-600 dark:text-stone-300">En mettant l&apos;accent sur l&apos;innovation, le confort et la ponctualité, nous nous engageons à améliorer la mobilité urbaine et à faciliter les déplacements quotidiens de nos passagers.</p>
+        <p className="mt-6 text-lg leading-relaxed text-stone-600 dark:text-stone-300">{vision.body}</p>
+
         <h3 className="mt-12 text-3xl font-semibold text-primary">Notre Mission</h3>
-        <p className="mt-6 text-lg leading-relaxed text-stone-600 dark:text-stone-300">LIMAJS MOTORS SA vise à connecter les gens et les communautés par le transport. Elle se donne pour mission de favoriser la mobilité durable des écoliers, des universitaires et des professionnels par des systèmes de transport sécuritaires et accessibles. Ses actions se fondent d&apos;une part, sur l&apos;excellence, une façon d&apos;offrir continuellement un service de qualité optimale, rigoureux et respectueux qui valorise les parties prenantes et qui s&apos;inspire des meilleurs pratiques des systèmes de transports internationaux. D&apos;autres part, sur le réseautage, une façon d&apos;assurer la bonne liaison entre les acteurs du service tant local que régional, tant national qu&apos;international. Et enfin, la multiplication, une façon d&apos;assurer la durabilité du service dans le temps et dans l&apos;espace et garantir un effort de partenariat à l&apos;échelle mondiale. D&apos;où notre slogan : L&apos;accès et l&apos;assurance de voyager !</p>
-        <Link to="/a-propos/histoire" className="mt-8 inline-flex border border-primary px-6 py-3 font-semibold text-primary hover:bg-primary hover:text-white">Découvrir notre histoire</Link>
+        <p className="mt-6 text-lg leading-relaxed text-stone-600 dark:text-stone-300">{mission.body}</p>
+
+        <div className="mt-8 divide-y divide-stone-300 border-y border-stone-300 dark:divide-stone-700 dark:border-stone-700">
+          {audiences.map((audience) => (
+            <div key={audience.title} className="grid gap-2 py-5 sm:grid-cols-[150px_1fr]">
+              <p className="font-semibold text-primary">{audience.title}</p>
+              <p className="leading-relaxed text-stone-600 dark:text-stone-300">{audience.body}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
 
-    <div className="mt-28 grid gap-10 lg:grid-cols-[1fr_0.9fr]">
-      <div><h3 className="text-4xl font-semibold tracking-[-0.04em]">Notre Histoire</h3><p className="mt-4 text-lg text-stone-600 dark:text-stone-300">Découvrez les moments clés qui ont façonné LIMAJS MOTORS depuis sa création.</p><div className="mt-10 border-t border-stone-300 dark:border-stone-700">{historyItems.map(([date, title, description]) => <div key={date} className="grid gap-4 border-b border-stone-300 py-7 dark:border-stone-700 sm:grid-cols-[140px_1fr]"><p className="text-sm font-semibold text-primary">{date}</p><div><h4 className="text-xl font-semibold">{title}</h4><p className="mt-2 leading-relaxed text-stone-600 dark:text-stone-300">{description}</p></div></div>)}</div></div>
-      <img src={driverImage} alt="" className="h-full min-h-[600px] w-full object-cover" loading="lazy" />
+    {/* Origine — Infolettre Juin 2025, préambule */}
+    <div className="mt-28 grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-center">
+      <div>
+        <h3 className="text-4xl font-semibold tracking-[-0.04em]">Une initiative née à l&apos;ISTEAH</h3>
+        <p className="mt-6 text-lg leading-relaxed text-stone-600 dark:text-stone-300">{origin.founded}</p>
+        <p className="mt-5 text-lg leading-relaxed text-stone-600 dark:text-stone-300">{origin.motivation}</p>
+        <p className="mt-5 text-lg leading-relaxed text-stone-600 dark:text-stone-300">{origin.launch}</p>
+        <p className="mt-6 text-sm text-stone-500 dark:text-stone-400">Source : Infolettre Juin 2025.</p>
+      </div>
+      <img src={schoolImage} alt="Prise en charge des écoliers à la Cité du Savoir" className="h-full min-h-[420px] w-full object-cover" loading="lazy" />
     </div>
 
+    {/* Valeurs — Infolettre Août 2026 */}
+    <div className="mt-28">
+      <h3 className="text-4xl font-semibold tracking-[-0.04em]">Nos trois valeurs fondamentales</h3>
+      <p className="mt-4 max-w-2xl text-lg text-stone-600 dark:text-stone-300">
+        Pour accomplir sa mission, l&apos;entreprise construit son action autour de l&apos;Excellence, du Réseautage et de la Multiplication.
+      </p>
+      <div className="mt-10 grid border-y border-stone-300 dark:border-stone-700 lg:grid-cols-3">
+        {values.map((value, index) => (
+          <div key={value.name} className={`p-7 lg:p-9 ${index < values.length - 1 ? 'lg:border-r' : ''} border-t border-stone-300 dark:border-stone-700 lg:border-t-0`}>
+            <h4 className="text-2xl font-semibold text-primary">{value.name}</h4>
+            <p className="mt-3 font-medium text-stone-800 dark:text-stone-100">{value.tagline}</p>
+            <p className="mt-4 leading-relaxed text-stone-600 dark:text-stone-300">{value.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Réalisations — tableau de l'Infolettre Juin 2025 */}
+    <div className="mt-28 grid gap-10 lg:grid-cols-[1fr_0.75fr]">
+      <div>
+        <h3 className="text-4xl font-semibold tracking-[-0.04em]">Nos réalisations</h3>
+        <p className="mt-4 text-lg text-stone-600 dark:text-stone-300">
+          Les étapes effectivement franchies, telles que publiées dans l&apos;infolettre de juin 2025.
+        </p>
+        <div className="mt-10 border-t border-stone-300 dark:border-stone-700">
+          {realisations.map(([description, date, status]) => (
+            <div key={description} className="grid gap-3 border-b border-stone-300 py-5 dark:border-stone-700 sm:grid-cols-[150px_1fr_110px]">
+              <p className="text-sm font-semibold text-primary">{date}</p>
+              <p className="leading-relaxed text-stone-700 dark:text-stone-200">{description}</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 sm:text-right">{status}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+      <img src={boardingImage} alt="Écoliers embarquant dans le véhicule de LIMAJS MOTORS SA" className="h-full min-h-[600px] w-full object-cover" loading="lazy" />
+    </div>
+
+    {/* Deux années de service — Infolettre Août 2026 */}
     <div className="mt-28 grid bg-secondary text-white lg:grid-cols-2">
-      <img src={schoolImage} alt="" className="h-full min-h-[520px] w-full object-cover" loading="lazy" />
-      <div className="p-8 md:p-14"><h3 className="text-4xl font-semibold">Notre Impact Social</h3><p className="mt-5 max-w-xl text-lg leading-relaxed text-white/80">LIMAJS MOTORS SA contribue au développement économique et social du Nord d&apos;Haïti.</p><div className="mt-10 grid grid-cols-2 border-l border-t border-white/30">{impact.map(([title, description]) => <div key={title} className="border-b border-r border-white/30 p-5"><h4 className="text-2xl font-semibold text-[#ff9a5e]">{title}</h4><p className="mt-2 text-sm leading-relaxed text-white/75">{description}</p></div>)}</div><Link to="/a-propos/impact-social" className="mt-8 inline-flex border border-white px-6 py-3 font-semibold text-white hover:bg-white hover:text-secondary">Découvrir notre impact</Link></div>
-    </div>
-
-    <div className="mt-28 grid gap-10 lg:grid-cols-2 lg:items-center">
-      <div><h3 className="text-4xl font-semibold">Notre Équipe</h3><p className="mt-5 max-w-xl text-lg leading-relaxed text-stone-600 dark:text-stone-300">L&apos;entreprise est dirigée par un conseil d&apos;administration (CA) qui est responsable de son contrôle et de sa gestion. Les membres ont des compétences diverses en gestion de projet, NTIC, recherche opérationnelle, et plus.</p><Link to="/a-propos/equipe" className="mt-8 inline-flex border border-primary px-6 py-3 font-semibold text-primary hover:bg-primary hover:text-white">Rencontrer notre équipe</Link></div>
-      <img src={waitingImage} alt="" className="aspect-[4/3] w-full object-cover" loading="lazy" />
+      <img src={routeImage} alt="Écoliers accompagnés jusqu'au véhicule sur la route de Milot" className="h-full min-h-[520px] w-full object-cover" loading="lazy" />
+      <div className="p-8 md:p-14">
+        <h3 className="text-4xl font-semibold">Deux ans de parcours</h3>
+        <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/80">{bilanDeuxAns.intro}</p>
+        <p className="mt-5 max-w-xl leading-relaxed text-white/70">{bilanDeuxAns.challenges}</p>
+        <p className="mt-5 max-w-xl leading-relaxed text-white/70">{bilan2026.usageCollecte}</p>
+        <p className="mt-8 text-sm text-white/50">Source : Infolettre Août 2026.</p>
+        <Link to="/infolettres" className="mt-8 inline-flex border border-white px-6 py-3 font-semibold text-white hover:bg-white hover:text-secondary">
+          Lire les infolettres
+        </Link>
+      </div>
     </div>
   </Section>
 );

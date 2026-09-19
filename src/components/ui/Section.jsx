@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 
 // Importer les animations depuis les utils
-import { fadeInUp, scrollReveal, observerConfig } from '../../utils/animations';
+import { titleReveal, scrollReveal, motionViewport } from '../../utils/animations';
 
 const Section = ({
   id,
@@ -17,7 +17,7 @@ const Section = ({
   subtitleClassName = '',
   contentClassName = '',
   withAnimation = true,
-  titleAnimation = fadeInUp,
+  titleAnimation = titleReveal,
   contentAnimation = scrollReveal,
   titleAs = 'h2',
   subtitleAs = 'p',
@@ -42,7 +42,7 @@ const Section = ({
               <motion.div
                 initial={withAnimation ? "hidden" : false}
                 whileInView={withAnimation ? "visible" : false}
-                viewport={observerConfig}
+                viewport={motionViewport}
                 variants={variants.title}
                 className="mb-4"
               >
@@ -58,7 +58,7 @@ const Section = ({
               <motion.div
                 initial={withAnimation ? "hidden" : false}
                 whileInView={withAnimation ? "visible" : false}
-                viewport={observerConfig}
+                viewport={motionViewport}
                 variants={variants.title}
                 className="mt-4"
               >
@@ -76,7 +76,7 @@ const Section = ({
         <motion.div
           initial={withAnimation ? "hidden" : false}
           whileInView={withAnimation ? "visible" : false}
-          viewport={observerConfig}
+          viewport={motionViewport}
           variants={variants.content}
           className={contentClassName}
         >

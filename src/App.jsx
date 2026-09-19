@@ -21,11 +21,6 @@ const Contact = React.lazy(() => import('./components/sections/Contact'));
 const Invest = React.lazy(() => import('./components/sections/Invest'));
 const ReportPreview = React.lazy(() => import('./components/sections/ReportPreview'));
 
-// Lazy load page components for nested routes
-const ServiceDetails = React.lazy(() => import('./components/pages/ServiceDetails'));
-const AboutDetails = React.lazy(() => import('./components/pages/AboutDetails'));
-const InvestDetails = React.lazy(() => import('./components/pages/InvestDetails'));
-
 // Loading Fallback
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -56,14 +51,14 @@ const App = () => {
       <AppProvider>
         <div className="flex flex-col min-h-screen bg-background">
           <Header />
-          
+
           <main className="flex-grow">
             <Suspense fallback={<LoadingFallback />}>
               <AnimatePresence mode='wait'>
                 <Routes location={location} key={location.pathname}>
                   {/* Page d'accueil */}
-                  <Route 
-                    path="/" 
+                  <Route
+                    path="/"
                     element={
                       <>
                         <Hero />
@@ -74,28 +69,20 @@ const App = () => {
                         <Partners />
                         <Contact />
                       </>
-                    } 
+                    }
                   />
-                  
-                  {/* Routes Services */}
-                  <Route path="/services" element={<Services />} />
-                  <Route path="/services/:serviceType" element={<ServiceDetails />} />
-                  
-                  {/* Routes À Propos */}
-                  <Route path="/a-propos" element={<About />} />
-                  <Route path="/a-propos/:section" element={<AboutDetails />} />
-                  
-                  {/* Routes Investir */}
-                  <Route path="/investir" element={<Invest />} />
-                  <Route path="/investir/:section" element={<InvestDetails />} />
-                  
+
                   {/* Pages indépendantes */}
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/a-propos" element={<About />} />
+                  <Route path="/investir" element={<Invest />} />
+                  <Route path="/infolettres" element={<ReportPreview />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/partenaires" element={<Partners />} />
-                  
+
                   {/* Page 404 */}
-                  <Route 
-                    path="*" 
+                  <Route
+                    path="*"
                     element={
                       <div className="flex items-center justify-center min-h-[70vh] flex-col text-center px-4">
                         <h1 className="text-4xl md:text-6xl font-bold mb-4 text-primary">404</h1>
@@ -107,7 +94,7 @@ const App = () => {
                           Retour à l&apos;accueil
                         </a>
                       </div>
-                    } 
+                    }
                   />
                 </Routes>
               </AnimatePresence>
