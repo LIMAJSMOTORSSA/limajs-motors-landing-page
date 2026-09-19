@@ -1,5 +1,5 @@
 // src/components/pages/ServiceDetails.jsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
@@ -9,9 +9,6 @@ import {
   Car, 
   Package, 
   ChevronRight, 
-  Clock, 
-  MapPin, 
-  CreditCard, 
   Users, 
   GraduationCap, 
   Briefcase, 

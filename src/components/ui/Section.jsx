@@ -1,5 +1,4 @@
 // src/components/ui/Section.jsx
-import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 
@@ -34,11 +33,11 @@ const Section = ({
   const SubheadingTag = subtitleAs;
 
   return (
-    <section id={id} className={`py-16 md:py-24 ${bgColor} ${className}`}>
-      <div className={`container mx-auto px-4 md:px-6 ${containerClassName}`}>
+    <section id={id} className={`py-20 md:py-28 ${bgColor} ${className}`}>
+      <div className={`container mx-auto max-w-[1440px] px-5 md:px-10 lg:px-16 ${containerClassName}`}>
         {/* En-tête de section avec titre et sous-titre */}
         {(title || subtitle) && (
-          <div className="text-center mb-12 md:mb-16">
+          <div className="mb-12 md:mb-16 max-w-4xl">
             {title && (
               <motion.div
                 initial={withAnimation ? "hidden" : false}
@@ -48,7 +47,7 @@ const Section = ({
                 className="mb-4"
               >
                 <HeadingTag 
-                  className={`text-3xl md:text-4xl lg:text-5xl font-bold ${titleClassName}`}
+                  className={`text-4xl md:text-6xl font-semibold tracking-[-0.045em] leading-[0.96] ${titleClassName}`}
                 >
                   {title}
                 </HeadingTag>
@@ -64,7 +63,7 @@ const Section = ({
                 className="mt-4"
               >
                 <SubheadingTag 
-                  className={`text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto ${subtitleClassName}`}
+                  className={`text-lg md:text-xl leading-relaxed text-stone-600 dark:text-stone-300 max-w-2xl ${subtitleClassName}`}
                 >
                   {subtitle}
                 </SubheadingTag>

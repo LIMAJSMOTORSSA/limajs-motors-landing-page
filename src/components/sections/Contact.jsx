@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { MapPin, Phone, Mail, Send, Check } from 'lucide-react';
@@ -33,7 +33,7 @@ const ContactInfo = ({ icon: Icon, title, content, link, linkType }) => {
 
   return (
     <div className="flex items-start gap-4">
-      <div className="bg-primary/10 p-3 rounded-lg">
+      <div className="border-l-2 border-primary pl-3">
         <Icon className="w-6 h-6 text-primary" />
       </div>
       <div>
@@ -219,7 +219,7 @@ const Contact = () => {
       id="contact"
       title="Entrer en Contact"
       subtitle="Nous sommes là pour répondre à vos questions et vous aider dans vos déplacements."
-      bgColor="bg-gray-50 dark:bg-gray-900"
+      bgColor="bg-[#f6f4ef] dark:bg-stone-950"
     >
       <div className="grid md:grid-cols-2 gap-12">
         {/* Informations de contact */}
@@ -246,7 +246,7 @@ const Contact = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="mt-8 aspect-video bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md"
+            className="mt-8 aspect-video overflow-hidden border border-stone-300 bg-white dark:border-stone-700 dark:bg-stone-900"
           >
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30106.80393651724!2d-72.22648968700048!3d19.606071042656377!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8eb1f0262e1bb5eb%3A0xae7549560a3dc5a6!2sMilot!5e0!3m2!1sfr!2sht!4v1708864584371!5m2!1sfr!2sht"
@@ -266,7 +266,7 @@ const Contact = () => {
           initial={{ opacity: 0, x: 20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
-          className="bg-white dark:bg-gray-800 rounded-xl p-6 md:p-8 shadow-sm"
+          className="border-t-4 border-primary bg-white p-6 dark:bg-stone-900 md:p-10"
         >
           {isSubmitted ? (
             <motion.div
@@ -302,7 +302,7 @@ const Contact = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg border ${formErrors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white`}
+                  className={`w-full px-4 py-3 border ${formErrors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-stone-800 dark:text-white`}
                 />
                 {formErrors.name && (
                   <p className="mt-1 text-sm text-red-500">{formErrors.name}</p>
@@ -319,7 +319,7 @@ const Contact = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg border ${formErrors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white`}
+                  className={`w-full px-4 py-3 border ${formErrors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-stone-800 dark:text-white`}
                 />
                 {formErrors.email && (
                   <p className="mt-1 text-sm text-red-500">{formErrors.email}</p>
@@ -336,7 +336,7 @@ const Contact = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg border ${formErrors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white`}
+                  className={`w-full px-4 py-3 border ${formErrors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-stone-800 dark:text-white`}
                 />
                 {formErrors.phone && (
                   <p className="mt-1 text-sm text-red-500">{formErrors.phone}</p>
@@ -353,7 +353,7 @@ const Contact = () => {
                   value={formData.message}
                   onChange={handleChange}
                   rows={4}
-                  className={`w-full px-4 py-3 rounded-lg border ${formErrors.message ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white`}
+                  className={`w-full px-4 py-3 border ${formErrors.message ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-stone-800 dark:text-white`}
                 />
                 {formErrors.message && (
                   <p className="mt-1 text-sm text-red-500">{formErrors.message}</p>
@@ -386,7 +386,7 @@ const Contact = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.3 }}
-        className="mt-16 bg-primary/5 dark:bg-primary/10 rounded-xl p-8 max-w-5xl mx-auto"
+        className="mt-16 border-y border-stone-300 py-10 dark:border-stone-700 max-w-5xl"
       >
         <h3 className="text-xl font-bold mb-6 text-center">Heures d&apos;ouverture</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

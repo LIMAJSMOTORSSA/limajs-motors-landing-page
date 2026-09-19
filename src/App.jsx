@@ -25,7 +25,6 @@ const ReportPreview = React.lazy(() => import('./components/sections/ReportPrevi
 const ServiceDetails = React.lazy(() => import('./components/pages/ServiceDetails'));
 const AboutDetails = React.lazy(() => import('./components/pages/AboutDetails'));
 const InvestDetails = React.lazy(() => import('./components/pages/InvestDetails'));
-const ReportDetails = React.lazy(() => import('./components/pages/ReportDetails'));
 
 // Loading Fallback
 const LoadingFallback = () => (
@@ -69,9 +68,9 @@ const App = () => {
                       <>
                         <Hero />
                         <Services />
-                        <ReportPreview /> {/* Ajout du composant ReportPreview ici */}
                         <About />
                         <Features />
+                        <ReportPreview />
                         <Partners />
                         <Contact />
                       </>
@@ -89,9 +88,6 @@ const App = () => {
                   {/* Routes Investir */}
                   <Route path="/investir" element={<Invest />} />
                   <Route path="/investir/:section" element={<InvestDetails />} />
-                  
-                  {/* Route Rapport d'Activité */}
-                  <Route path="/rapport-activite" element={<ReportDetails />} />
                   
                   {/* Pages indépendantes */}
                   <Route path="/contact" element={<Contact />} />

@@ -78,7 +78,7 @@ export const contactSeoData = {
  * @returns {Object} - Objet contenant toutes les balises meta
  */
 export const generateSeoTags = (seoData) => {
-  const { title, description, keywords, canonical, locale, ogType, ogImage, twitterCard, twitterImage, siteUrl, schema } = seoData;
+  const { title, description, keywords, canonical, locale, ogType, ogImage, twitterCard, twitterImage, schema } = seoData;
   
   return {
     title: title,
@@ -104,4 +104,3 @@ export const generateSeoTags = (seoData) => {
     schema: schema,
   };
 };
-

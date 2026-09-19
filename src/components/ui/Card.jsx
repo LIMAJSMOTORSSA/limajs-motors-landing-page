@@ -1,5 +1,4 @@
 // src/components/ui/Card.jsx
-import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -36,13 +35,13 @@ const Card = ({
     default: "bg-white dark:bg-gray-800 shadow-card",
     outline: "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700",
     filled: "bg-primary/5 dark:bg-primary/10",
-    elevated: "bg-white dark:bg-gray-800 shadow-lg",
+    elevated: "bg-white dark:bg-gray-800 border border-stone-200 dark:border-stone-700",
   };
 
   return (
     <CardComponent
       className={`
-        rounded-xl overflow-hidden
+        rounded-none overflow-hidden
         transition-all duration-300
         ${variantStyles[variant]}
         ${onClick || to ? 'cursor-pointer' : ''}
@@ -71,7 +70,7 @@ const Card = ({
           )}
           
           {Icon && !image && (
-            <div className="aspect-[3/1] w-full bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center">
+            <div className="aspect-[3/1] w-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
               <Icon size={48} className="text-primary" />
             </div>
           )}

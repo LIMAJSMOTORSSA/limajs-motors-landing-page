@@ -1,5 +1,4 @@
 // src/components/ui/SubscriptionCard.jsx
-import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { Check, X } from 'lucide-react';
@@ -45,8 +44,8 @@ const SubscriptionCard = ({
       variants={hoverAnimation}
       transition={{ duration: 0.3 }}
       className={`
-        relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden
-        shadow-lg border border-gray-100 dark:border-gray-700
+        relative bg-white dark:bg-gray-800 rounded-none overflow-hidden
+        border border-gray-200 dark:border-gray-700
         ${popular ? 'ring-2 ring-primary' : ''}
         ${className}
       `}

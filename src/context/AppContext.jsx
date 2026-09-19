@@ -1,5 +1,6 @@
 // src/context/AppContext.jsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState, useEffect } from 'react';
 
 // Création du contexte
 const AppContext = createContext();

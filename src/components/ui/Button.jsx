@@ -1,5 +1,4 @@
 // src/components/ui/Button.jsx
-import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { Loader } from 'lucide-react';
@@ -20,12 +19,12 @@ const Button = ({
   target,
   ...props
 }) => {
-  const baseStyles = "inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-300";
+  const baseStyles = "inline-flex items-center justify-center rounded-none font-semibold tracking-wide transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
   
   const variants = {
-    primary: "bg-primary hover:bg-primary-dark focus:ring-primary text-white shadow-button hover:shadow-lg",
+    primary: "bg-primary hover:bg-primary-dark focus:ring-primary text-white",
     secondary: "bg-secondary hover:bg-secondary-dark focus:ring-secondary text-white",
-    outline: "border-2 border-primary text-primary hover:bg-primary/10 focus:ring-primary",
+    outline: "border border-primary text-primary hover:bg-primary hover:text-white focus:ring-primary",
     ghost: "text-primary hover:bg-primary/10 focus:ring-primary"
   };
 
@@ -49,7 +48,6 @@ const Button = ({
 
   return (
     <Component
-      whileTap={{ scale: disabled || isLoading ? 1 : 0.95 }}
       type={as === 'button' ? type : undefined}
       onClick={onClick}
       disabled={disabled || isLoading}

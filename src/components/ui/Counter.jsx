@@ -1,5 +1,5 @@
 // src/components/ui/Counter.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { motion, useInView } from 'framer-motion';
 

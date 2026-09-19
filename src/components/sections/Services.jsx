@@ -1,280 +1,71 @@
-// src/components/sections/Services.jsx
-import React from 'react';
-import PropTypes from 'prop-types';
-import { motion } from 'framer-motion';
-import { Bus, GraduationCap, Briefcase, Users, Calendar, Car, Package, Clock, ShieldCheck, DollarSign, Zap } from 'lucide-react';
-
-// Composants
+import { Link } from 'react-router-dom';
 import Section from '../ui/Section';
-import Card from '../ui/Card';
-import Button from '../ui/Button';
+import schoolImage from '../../assets/images/editorial/school-boarding.webp';
+import universityImage from '../../assets/images/editorial/university-commute.webp';
+import professionalImage from '../../assets/images/editorial/professional-commute.webp';
+import publicImage from '../../assets/images/editorial/cap-haitien-street.webp';
+import urbanImage from '../../assets/images/editorial/interurban-road.webp';
+import subscriptionImage from '../../assets/images/editorial/nfc-payment.webp';
+import rentalImage from '../../assets/images/editorial/vehicle-interior.webp';
+import deliveryImage from '../../assets/images/editorial/parcel-service.webp';
 
-// Assets
-import TransportPublicImage from '../../assets/images/tech/transport-public.jpg';
-import TransportServiceImage from '../../assets/images/tech/transport-service.jpg';
+const serviceTypes = [
+  { title: 'Transport Urbain', description: 'Un service régulier et ponctuel à travers Cap-Haïtien et ses environs.', link: '/services/transport-urbain', image: urbanImage },
+  { title: 'Abonnements', description: "Économisez avec nos formules d'abonnement adaptées à vos besoins.", link: '/services/abonnements', image: subscriptionImage },
+  { title: 'Location', description: "Besoin d'un véhicule pour vos déplacements personnels? Découvrez notre flotte.", link: '/services/location', image: rentalImage },
+  { title: 'Livraison', description: 'Nous transportons vos colis avec une fiabilité exemplaire.', link: '/services/livraison', image: deliveryImage },
+];
 
-const ServiceCard = ({ title, description, icon: Icon, image, onClick }) => (
-  <Card
-    image={image}
-    icon={Icon}
-    title={title}
-    subtitle={description}
-    hoverable
-    onClick={onClick}
-    className="group hover:scale-105 transition-transform duration-300"
-  />
-);
+const clients = [
+  { title: 'Écoliers', description: 'Des trajets sécurisés et confortables pour vos petits, chaque jour.', link: '/services/transport-urbain?client=ecoliers', image: schoolImage },
+  { title: 'Étudiants', description: "Arrivez à l'heure à vos cours avec notre service de transport rapide et abordable.", link: '/services/transport-urbain?client=etudiants', image: universityImage },
+  { title: 'Employés', description: 'Commencez votre journée de travail sans tracas grâce à notre service de transport efficace.', link: '/services/transport-urbain?client=employes', image: professionalImage },
+  { title: 'Grand public', description: 'Déplacez-vous facilement à travers la ville à un prix abordable.', link: '/services/transport-urbain?client=public', image: publicImage },
+];
 
-ServiceCard.propTypes = {
-  title: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
-  icon: PropTypes.elementType.isRequired,
-  image: PropTypes.string.isRequired,
-  onClick: PropTypes.func,
-};
+const features = [
+  ['Fiabilité', 'Horaires précis et trajets optimisés'],
+  ['Sécurité', 'Véhicules entretenus et chauffeurs formés'],
+  ['Accessibilité', 'Tarifs abordables et paiement flexible'],
+  ['Innovation', 'Paiement sans contact par carte NFC'],
+];
 
-const FeatureCard = ({ label, description }) => (
-  <motion.div 
-    whileHover={{ y: -5 }}
-    transition={{ duration: 0.2 }}
-    className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm text-center"
-  >
-    <h3 className="font-bold text-lg mb-2 text-primary">
-      {label}
-    </h3>
-    <p className="text-gray-600 dark:text-gray-300">
-      {description}
-    </p>
-  </motion.div>
-);
+const Services = () => (
+  <Section id="services" title="Nos Services" subtitle="Découvrez nos solutions de transport adaptées à vos besoins quotidiens." bgColor="bg-[#f6f4ef] dark:bg-stone-950">
+    <div className="grid border-y border-stone-300 dark:border-stone-700 lg:grid-cols-2">
+      {serviceTypes.map((service, index) => (
+        <Link key={service.title} to={service.link} className={`group grid min-h-[360px] grid-cols-1 bg-white dark:bg-stone-900 sm:grid-cols-2 ${index % 2 === 0 ? 'lg:border-r' : ''} border-stone-300 dark:border-stone-700`}>
+          <img src={service.image} alt="" className="h-64 w-full object-cover sm:h-full" loading="lazy" />
+          <div className="flex flex-col justify-between p-7 md:p-10">
+            <div><p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-primary">0{index + 1}</p><h3 className="text-3xl font-semibold">{service.title}</h3><p className="mt-4 leading-relaxed text-stone-600 dark:text-stone-300">{service.description}</p></div>
+            <span className="mt-8 border-b border-stone-900 pb-1 text-sm font-semibold dark:border-white">En savoir plus</span>
+          </div>
+        </Link>
+      ))}
+    </div>
 
-FeatureCard.propTypes = {
-  label: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired
-};
-
-const Services = () => {
-  // Clientèles cibles
-  const clientServices = [
-    {
-      title: "Écoliers",
-      description: "Des trajets sécurisés et confortables pour vos petits, chaque jour.",
-      icon: Bus,
-      image: TransportPublicImage,
-      link: "/services/transport-urbain?client=ecoliers"
-    },
-    {
-      title: "Étudiants",
-      description: "Arrivez à l'heure à vos cours avec notre service de transport rapide et abordable.",
-      icon: GraduationCap,
-      image: TransportServiceImage,
-      link: "/services/transport-urbain?client=etudiants"
-    },
-    {
-      title: "Employés",
-      description: "Commencez votre journée de travail sans tracas grâce à notre service de transport efficace.",
-      icon: Briefcase,
-      image: TransportPublicImage,
-      link: "/services/transport-urbain?client=employes"
-    },
-    {
-      title: "Grand public",
-      description: "Déplacez-vous facilement à travers la ville à un prix abordable.",
-      icon: Users,
-      image: TransportServiceImage,
-      link: "/services/transport-urbain?client=public"
-    }
-  ];
-
-  // Types de services
-  const serviceTypes = [
-    {
-      title: "Transport Urbain",
-      description: "Un service régulier et ponctuel à travers Cap-Haïtien et ses environs.",
-      icon: Bus,
-      link: "/services/transport-urbain"
-    },
-    {
-      title: "Abonnements",
-      description: "Économisez avec nos formules d'abonnement adaptées à vos besoins.",
-      icon: Calendar,
-      link: "/services/abonnements"
-    },
-    {
-      title: "Location",
-      description: "Besoin d'un véhicule pour vos déplacements personnels? Découvrez notre flotte.",
-      icon: Car,
-      link: "/services/location"
-    },
-    {
-      title: "Livraison",
-      description: "Nous transportons vos colis avec une fiabilité exemplaire.",
-      icon: Package,
-      link: "/services/livraison"
-    }
-  ];
-
-  // Caractéristiques des services
-  const features = [
-    { 
-      label: "Fiabilité", 
-      description: "Horaires précis et trajets optimisés",
-      icon: Clock
-    },
-    { 
-      label: "Sécurité", 
-      description: "Véhicules entretenus et chauffeurs formés",
-      icon: ShieldCheck
-    },
-    { 
-      label: "Accessibilité", 
-      description: "Tarifs abordables et paiement flexible",
-      icon: DollarSign
-    },
-    { 
-      label: "Innovation", 
-      description: "Paiement sans contact par carte NFC",
-      icon: Zap
-    }
-  ];
-
-  // Navigation vers une page de service
-  const navigateToService = (link) => {
-    window.location.href = link;
-  };
-
-  return (
-    <Section 
-      id="services" 
-      title="Nos Services" 
-      subtitle="Découvrez nos solutions de transport adaptées à vos besoins quotidiens."
-      bgColor="bg-gray-50 dark:bg-gray-900"
-    >
-      {/* Types de services */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-        {serviceTypes.map((service, index) => (
-          <motion.div
-            key={service.title}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ 
-              duration: 0.5,
-              delay: index * 0.1
-            }}
-          >
-            <Card
-              title={service.title}
-              subtitle={service.description}
-              icon={service.icon}
-              hoverable
-              variant="filled"
-              onClick={() => navigateToService(service.link)}
-              footer={
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  fullWidth
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigateToService(service.link);
-                  }}
-                >
-                  En savoir plus
-                </Button>
-              }
-            />
-          </motion.div>
+    <div className="py-20 md:py-28">
+      <div className="mb-12 grid gap-5 md:grid-cols-[1fr_1.2fr] md:items-end">
+        <h3 className="text-4xl font-semibold tracking-[-0.04em] md:text-5xl">Transport Urbain et Interurbain</h3>
+        <p className="max-w-2xl text-lg leading-relaxed text-stone-600 dark:text-stone-300">Un service régulier et ponctuel à travers Cap-Haïtien et ses environs pour tous types de clientèle.</p>
+      </div>
+      <div className="grid gap-3 md:grid-cols-12 md:grid-rows-2">
+        {clients.map((client, index) => (
+          <Link key={client.title} to={client.link} className={`group relative min-h-[330px] overflow-hidden ${index === 0 || index === 3 ? 'md:col-span-7' : 'md:col-span-5'}`}>
+            <img src={client.image} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
+            <div className="absolute inset-x-0 bottom-0 bg-black/65 p-6 text-white">
+              <h4 className="text-2xl font-semibold">{client.title}</h4><p className="mt-2 max-w-lg leading-relaxed text-white/85">{client.description}</p>
+            </div>
+          </Link>
         ))}
       </div>
+    </div>
 
-      {/* Transport Urbain et Interurbain - Section détaillée */}
-      <div className="mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-10"
-        >
-          <h3 className="text-2xl md:text-3xl font-bold mb-4">
-            Transport Urbain et Interurbain
-          </h3>
-          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Un service régulier et ponctuel à travers Cap-Haïtien et ses environs pour tous types de clientèle.
-          </p>
-        </motion.div>
-
-        {/* Clientèles cibles */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {clientServices.map((service, index) => (
-            <motion.div
-              key={service.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ 
-                duration: 0.5,
-                delay: index * 0.1
-              }}
-            >
-              <ServiceCard 
-                title={service.title}
-                description={service.description}
-                icon={service.icon}
-                image={service.image}
-                onClick={() => navigateToService(service.link)}
-              />
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Caractéristiques des services */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-      >
-        {features.map((feature, index) => (
-          <motion.div
-            key={feature.label}
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ 
-              duration: 0.3,
-              delay: index * 0.1
-            }}
-          >
-            <FeatureCard 
-              label={feature.label}
-              description={feature.description}
-            />
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-        className="mt-16 text-center"
-      >
-        <Button 
-          variant="primary" 
-          size="lg"
-          onClick={() => navigateToService('/contact')}
-        >
-          Réserver un service
-        </Button>
-      </motion.div>
-    </Section>
-  );
-};
+    <div className="grid border-y border-stone-300 dark:border-stone-700 sm:grid-cols-2 lg:grid-cols-4">
+      {features.map(([label, description], index) => <div key={label} className={`p-7 lg:p-9 ${index < features.length - 1 ? 'lg:border-r' : ''} border-stone-300 dark:border-stone-700`}><h4 className="text-xl font-semibold text-primary">{label}</h4><p className="mt-3 text-stone-600 dark:text-stone-300">{description}</p></div>)}
+    </div>
+    <div className="mt-14"><Link to="/contact" className="inline-flex bg-primary px-7 py-3.5 font-semibold text-white hover:bg-primary-dark">Réserver un service</Link></div>
+  </Section>
+);
 
 export default Services;

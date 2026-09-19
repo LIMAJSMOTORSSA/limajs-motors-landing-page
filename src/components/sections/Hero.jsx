@@ -1,24 +1,21 @@
 // src/components/sections/Hero.jsx
-import React from 'react';
 import Carousel from '../ui/Carousel';
 
 // Assets
-import CitadelleImage from '../../assets/images/hero/citadelle.webp';
-import PalaisImage from '../../assets/images/hero/palais-sanssouci.webp';
-import PlaceArmesImage from '../../assets/images/hero/place-armes.webp';
-import CapPanoramaImage from '../../assets/images/hero/cap-haitien.webp';
+import CapStreetImage from '../../assets/images/editorial/cap-haitien-street.webp';
+import HeroCapImage from '../../assets/images/editorial/hero-cap-haitien.webp';
+import InterurbanImage from '../../assets/images/editorial/interurban-road.webp';
 
 const Hero = () => {
   // Images pour le carousel
   const heroImages = [
-    CitadelleImage,
-    PalaisImage,
-    PlaceArmesImage,
-    CapPanoramaImage
+    HeroCapImage,
+    CapStreetImage,
+    InterurbanImage
   ];
 
   return (
-    <section className="relative min-h-screen">
+    <section className="relative h-[72svh] min-h-[520px] md:h-[88svh]" aria-label="LIMAJS MOTORS">
       {/* Carousel en arrière-plan */}
       <div className="absolute inset-0 z-0">
         <Carousel
@@ -26,12 +23,11 @@ const Hero = () => {
           autoPlayInterval={6000}
           className="w-full h-full"
           height="h-full"
-          overlay={true}
+          overlay={false}
           showDots={false}
           showArrows={false}
+          borderRadius=""
         />
-        {/* Overlay gradient si nécessaire */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/30 z-10" />
       </div>
     </section>
   );

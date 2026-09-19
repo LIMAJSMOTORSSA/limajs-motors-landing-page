@@ -1,5 +1,4 @@
 // src/components/sections/Invest.jsx
-import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { TrendingUp, DollarSign, Award, Users, BarChart3, LineChart, PieChart } from 'lucide-react';

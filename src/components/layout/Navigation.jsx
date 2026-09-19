@@ -1,9 +1,9 @@
 // src/components/layout/Navigation.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Home, Bus, Info, CreditCard, Phone, User } from 'lucide-react';
+import { ChevronDown, Home, Bus, Info, CreditCard, Phone } from 'lucide-react';
 
 // Composant de lien de navigation avec sous-menu
 const NavItem = ({ item, isMobile, closeMobileMenu }) => {

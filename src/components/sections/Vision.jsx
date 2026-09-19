@@ -1,5 +1,4 @@
 // src/components/sections/Vision.jsx
-import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { Compass, Target, Star, TrendingUp, Lightbulb, Globe, CircleDollarSign, Heart } from 'lucide-react';
