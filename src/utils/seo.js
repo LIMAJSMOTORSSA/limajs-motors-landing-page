@@ -9,8 +9,8 @@ import { organizationSchema, serviceSchema } from './schema';
 // Métadonnées de base qui s'appliquent à tout le site
 export const defaultSeoData = {
   title: "LIMAJS MOTORS SA | Votre transport en bus moderne à Cap-Haïtien",
-  description: "LIMAJS MOTORS offre un service de transport en commun fiable et confortable au Cap-Haïtien. Transport urbain et interurbain, services d'abonnement, location de véhicules.",
-  keywords: "transport Cap-Haïtien, bus Haïti, transport en commun Nord Haïti, LIMAJS MOTORS, location véhicule Haïti",
+  description: "LIMAJS MOTORS SA favorise la mobilité durable des écoliers, des universitaires et des professionnels. Service lancé le 01 octobre 2024 à la Cité du Savoir, Milot.",
+  keywords: "LIMAJS MOTORS, transport scolaire Milot, Cité du Savoir, mobilité durable Haïti, transport Nord Haïti",
   canonical: "https://www.limajsmotorssaht.com/",
   locale: "fr_FR",
   ogType: "website",
@@ -30,8 +30,8 @@ export const homeSeoData = {
 export const servicesSeoData = {
   ...defaultSeoData,
   title: "Nos Services de Transport | LIMAJS MOTORS",
-  description: "Découvrez nos services de transport urbain, location de véhicules, abonnements et livraison au Cap-Haïtien. LIMAJS MOTORS, votre partenaire de mobilité.",
-  keywords: "transport urbain Cap-Haïtien, abonnement bus Haïti, location véhicule Cap-Haïtien, livraison colis Nord Haïti",
+  description: "Transport des écoliers à la Cité du Savoir depuis octobre 2024, abonnements, et services annoncés pour 2026-2027 : location de motos et transport de colis.",
+  keywords: "transport scolaire Cité du Savoir, abonnement LIMAJS MOTORS, location de motos Haïti, transport de colis Nord Haïti",
   canonical: "https://www.limajsmotors.com/services",
   schema: serviceSchema,
 };
@@ -40,8 +40,8 @@ export const servicesSeoData = {
 export const aboutSeoData = {
   ...defaultSeoData,
   title: "À Propos de LIMAJS MOTORS | Notre Histoire et Équipe",
-  description: "Découvrez l'histoire et la mission de LIMAJS MOTORS, entreprise de transport fondée en 2021 au Cap-Haïtien. Notre équipe et notre impact social en Haïti.",
-  keywords: "transport Cap-Haïtien histoire, équipe LIMAJS MOTORS, impact social transport Haïti, LIMAJS MOTORS fondation",
+  description: "LIMAJS MOTORS SA, initiative lancée fin 2021 par des étudiantes et étudiants de l'ISTEAH. Vision, mission, valeurs et réalisations publiées dans nos infolettres.",
+  keywords: "LIMAJS MOTORS histoire, ISTEAH transport, mission LIMAJS MOTORS, réalisations LIMAJS MOTORS",
   canonical: "https://www.limajsmotors.com/a-propos",
 };
 
@@ -49,8 +49,8 @@ export const aboutSeoData = {
 export const investSeoData = {
   ...defaultSeoData,
   title: "Opportunités d'Investissement | LIMAJS MOTORS",
-  description: "Investissez dans LIMAJS MOTORS, opportunité dans le secteur du transport au Nord d'Haïti. Analyse du marché, types d'actions et avantages concurrentiels.",
-  keywords: "investir transport Haïti, actions LIMAJS MOTORS, marché transport Cap-Haïtien, investissement transport Haïti",
+  description: "Bilan et offre d'actions de LIMAJS MOTORS SA : 22 actionnaires, actions ordinaires à 80 USD et privilégiées à 100 USD, selon l'infolettre d'août 2026.",
+  keywords: "actions LIMAJS MOTORS, actionnaires LIMAJS MOTORS, investir transport Haïti, actions ordinaires privilégiées",
   canonical: "https://www.limajsmotors.com/investir",
 };
 
@@ -58,7 +58,7 @@ export const investSeoData = {
 export const partnersSeoData = {
   ...defaultSeoData,
   title: "Nos Partenaires | LIMAJS MOTORS",
-  description: "Découvrez les partenaires de LIMAJS MOTORS qui nous aident à révolutionner le transport en commun dans le Nord d'Haïti. Collaborations stratégiques et institutionnelles.",
+  description: "Les partenaires de LIMAJS MOTORS SA : BUSKO, ISTEAH, PIGraN et GRAHN.",
   keywords: "partenaires LIMAJS MOTORS, BUSKO, ISTEAH, GRAHN, PIGraN, partenariat transport Haïti",
   canonical: "https://www.limajsmotors.com/partenaires",
 };
@@ -67,7 +67,7 @@ export const partnersSeoData = {
 export const contactSeoData = {
   ...defaultSeoData,
   title: "Contactez LIMAJS MOTORS | Transport Cap-Haïtien",
-  description: "Contactez LIMAJS MOTORS pour vos besoins de transport au Cap-Haïtien. Formulaire de contact, adresse, téléphone et email pour toutes vos questions.",
+  description: "Contactez LIMAJS MOTORS SA à la Cité du Savoir, Génipailler, Milot, Haïti. Formulaire de contact, adresse, téléphone et email.",
   keywords: "contact LIMAJS MOTORS, téléphone transport Cap-Haïtien, adresse bus Haïti, email LIMAJS MOTORS",
   canonical: "https://www.limajsmotors.com/contact",
 };

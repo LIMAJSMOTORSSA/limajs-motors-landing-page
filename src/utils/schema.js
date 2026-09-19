@@ -9,7 +9,7 @@ export const organizationSchema = {
     "name": "LIMAJS MOTORS SA",
     "image": "https://www.limajsmotorssaht.com/assets/images/logo/logo.png",
     "logo": "https://www.limajsmotorssaht.com/assets/images/logo/logo.png",
-    "description": "Service de transport en commun moderne, fiable et confortable au Cap-Haïtien.",
+    "description": "Service de transport favorisant la mobilité durable des écoliers, des universitaires et des professionnels.",
     "url": "https://www.limajsmotorssaht.com/",
     "telephone": "+50941704234",
     "email": "mainoffice@limajs.com",
@@ -24,14 +24,6 @@ export const organizationSchema = {
       "@type": "GeoCoordinates",
       "latitude": "19.6074",
       "longitude": "-72.2125"
-    },
-    "openingHoursSpecification": {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": [
-        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
-      ],
-      "opens": "06:00",
-      "closes": "19:00"
     },
     "sameAs": [
       "https://facebook.com/limajsmotors",
@@ -50,14 +42,9 @@ export const organizationSchema = {
     },
     "areaServed": {
       "@type": "City",
-      "name": "Cap-Haïtien"
+      "name": "Milot"
     },
-    "description": "Service de transport urbain et interurbain dans le Nord d'Haïti",
-    "offers": {
-      "@type": "Offer",
-      "priceCurrency": "HTG",
-      "availability": "https://schema.org/InStock"
-    }
+    "description": "Transport des écoliers entre leur demeure et la Cité du Savoir, à Milot"
   };
   
   // Aide à insérer le schema dans une page
