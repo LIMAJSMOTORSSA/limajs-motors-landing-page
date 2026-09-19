@@ -10,6 +10,14 @@ import Button from '../ui/Button';
 // Utilitaires
 import { isValidEmail, isValidHaitianPhone } from '../../utils/helpers';
 
+const CONTACT_EMAIL = 'mainoffice@limajs.com';
+
+/**
+ * Base de l'API. La sortie CDK `httpApi.url` se termine par « / », ce qui
+ * produirait « //contact » et une 404 : on retire la barre finale.
+ */
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
+
 const ContactInfo = ({ icon: Icon, title, content, link, linkType }) => {
   let linkProps = {};
 
@@ -67,7 +75,9 @@ const Contact = () => {
     name: '',
     email: '',
     phone: '',
-    message: ''
+    message: '',
+    // Champ piège anti-robot : laissé vide par un visiteur humain.
+    company: ''
   });
 
   // État des erreurs du formulaire
@@ -141,21 +151,12 @@ const Contact = () => {
     setSubmitError(null);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL;
-
-      // Fallback local pour éviter que le site ne crash si l'ENV n'est pas défini
-      if (!apiUrl) {
-        console.warn("VITE_API_URL n'est pas défini dans le fichier .env");
-        console.log("Payload:", formData);
-        // Simulation pour le dev local sans backend
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setIsSubmitted(true);
-        setFormData({ name: '', email: '', phone: '', message: '' });
-        setIsSubmitting(false);
-        return;
+      if (!API_BASE_URL) {
+        // Aucun backend configuré : on ne prétend pas que le message est parti.
+        throw new Error("Le formulaire n'est pas disponible pour le moment.");
       }
 
-      const response = await fetch(`${apiUrl}/contact`, {
+      const response = await fetch(`${API_BASE_URL}/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,7 +164,7 @@ const Contact = () => {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok || !data.success) {
         throw new Error(data.message || "Erreur lors de l'envoi du message");
@@ -177,12 +178,15 @@ const Contact = () => {
         name: '',
         email: '',
         phone: '',
-        message: ''
+        message: '',
+        company: ''
       });
     } catch (error) {
       // Gérer l'erreur
-      console.error('Erreur lors de l\'envoi du message:', error);
-      setSubmitError(error.message || "Une erreur s'est produite. Veuillez réessayer plus tard.");
+      console.error("Erreur lors de l'envoi du message:", error);
+      setSubmitError(
+        error.message || "Une erreur s'est produite. Veuillez réessayer plus tard."
+      );
     } finally {
       // Terminer la soumission
       setIsSubmitting(false);
@@ -292,6 +296,33 @@ const Contact = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <h3 className="text-xl font-bold mb-4 dark:text-white">Envoyez-nous un message</h3>
 
+              {/* Champ piège anti-robot : masqué, jamais rempli par un visiteur. */}
+              <div
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  width: 1,
+                  height: 1,
+                  padding: 0,
+                  margin: -1,
+                  overflow: 'hidden',
+                  clip: 'rect(0 0 0 0)',
+                  whiteSpace: 'nowrap',
+                  border: 0,
+                }}
+              >
+                <label htmlFor="company">Ne pas remplir</label>
+                <input
+                  type="text"
+                  id="company"
+                  name="company"
+                  value={formData.company}
+                  onChange={handleChange}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </div>
+
               <div>
                 <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                   Nom complet <span className="text-red-500">*</span>
@@ -362,7 +393,14 @@ const Contact = () => {
 
               {submitError && (
                 <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg">
-                  {submitError}
+                  <p>{submitError}</p>
+                  <p className="mt-2 text-sm">
+                    Vous pouvez aussi nous écrire à{' '}
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="underline font-semibold">
+                      {CONTACT_EMAIL}
+                    </a>
+                    .
+                  </p>
                 </div>
               )}
 
