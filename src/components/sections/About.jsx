@@ -14,7 +14,7 @@ import {
 import communityImage from '../../assets/images/service/groupe-ecoliers.webp';
 import routeImage from '../../assets/images/service/route-milot.webp';
 import schoolImage from '../../assets/images/service/cite-du-savoir.webp';
-import boardingImage from '../../assets/images/service/embarquement.webp';
+import realisationsImage from '../../assets/images/editorial/fleet-maintenance.webp';
 
 // Chiffres repris littéralement de l'Infolettre Août 2026 (bilan et perspectives).
 const figures = [
@@ -93,7 +93,7 @@ const About = () => (
     </div>
 
     {/* Réalisations — tableau de l'Infolettre Juin 2025 */}
-    <div className="mt-28 grid gap-10 lg:grid-cols-[1fr_0.75fr]">
+    <div className="mt-28 grid gap-10 lg:grid-cols-[1fr_0.75fr] lg:items-start">
       <div>
         <h3 className="text-4xl font-semibold tracking-[-0.04em]">Nos réalisations</h3>
         <p className="mt-4 text-lg text-stone-600 dark:text-stone-300">
@@ -109,7 +109,9 @@ const About = () => (
           ))}
         </div>
       </div>
-      <img src={boardingImage} alt="Écoliers embarquant dans le véhicule de LIMAJS MOTORS SA" className="h-full min-h-[600px] w-full object-cover" loading="lazy" />
+      <div className="lg:sticky lg:top-28">
+        <img src={realisationsImage} alt="Entretien du véhicule de LIMAJS MOTORS SA" className="h-[420px] w-full object-cover lg:h-[560px]" loading="lazy" />
+      </div>
     </div>
 
     {/* Deux années de service — Infolettre Août 2026 */}
