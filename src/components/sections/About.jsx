@@ -16,14 +16,6 @@ import routeImage from '../../assets/images/service/route-milot.webp';
 import schoolImage from '../../assets/images/service/cite-du-savoir.webp';
 import realisationsImage from '../../assets/images/editorial/fleet-maintenance.webp';
 
-// Chiffres repris littéralement de l'Infolettre Août 2026 (bilan et perspectives).
-const figures = [
-  [String(bilan2026.actionnaires), 'Actionnaires réunis depuis le lancement'],
-  [bilan2026.manifestationInteret, `Manifestation d'intérêt, sur un objectif de ${bilan2026.objectifFinancement}`],
-  [bilan2026.chiffreAffaires2026, "Chiffre d'affaires de l'année 2026"],
-  ['01 oct. 2024', 'Lancement du service à la Cité du Savoir'],
-];
-
 const About = () => (
   <Section
     id="about"
@@ -34,15 +26,6 @@ const About = () => (
     <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
       <div className="lg:sticky lg:top-28">
         <img src={communityImage} alt="Écoliers transportés par LIMAJS MOTORS SA devant le véhicule du service" className="aspect-[4/5] w-full object-cover" loading="lazy" />
-        <div className="grid grid-cols-2 border-x border-b border-stone-300 dark:border-stone-700">
-          {figures.map(([value, label]) => (
-            <div key={label} className="border-r border-t border-stone-300 p-5 last:border-r-0 dark:border-stone-700">
-              <p className="text-2xl font-semibold leading-tight text-primary">{value}</p>
-              <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">{label}</p>
-            </div>
-          ))}
-        </div>
-        <p className="mt-3 text-xs text-stone-500 dark:text-stone-400">Source : Infolettre Août 2026.</p>
       </div>
 
       <div className="lg:pt-16">
